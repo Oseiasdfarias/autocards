@@ -18,16 +18,15 @@
   --ifm-color-primary-lightest: #bad7f8;
 }
 
-/* prints das telas */
-.markdown img[src*='/assets/images/'] {
+/* prints das telas (imagens pequenas viram data: URI, por isso o seletor não olha o src) */
+.markdown p > img {
   display: block;
   max-width: 100%;
   margin: 1rem auto 0.25rem;
   border-radius: 8px;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
 }
-.markdown img[src*='/assets/images/'] + em,
-.markdown p:has(> img[src*='/assets/images/']) + p > em:only-child {
+.markdown p:has(> img) + p > em:only-child {
   display: block;
   text-align: center;
   font-size: 0.9em;

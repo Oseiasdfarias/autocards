@@ -39,6 +39,12 @@ If the audio of a card fails, the card is still added, without audio, and the er
 
 Every service has a **Test connection** button. Text services are checked by listing models; audio services by speaking "Hello".
 
+![Test connection: success, and a wrong key](/img/screens/en/connection-ok.png)
+![Test connection: success, and a wrong key](/img/screens/en/connection-fail.png)
+
+*Test connection: success, and a wrong key*
+
+
 ## Costs
 
 You pay the services directly, with your own account.

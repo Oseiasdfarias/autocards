@@ -40,6 +40,11 @@ The prompt is built from **fields**, each describing one aspect of the card:
 - **+ Add custom field** for anything else, with any name.
 - Placeholders `{topic}`, `{level}`, `{target_lang}` and `{native_lang}` are replaced with the values from the Basic tab.
 
+![Naming a custom field](/img/screens/en/custom-field.png)
+
+*Naming a custom field*
+
+
 The **Final prompt** box shows exactly what is sent, live and read-only, with a **Copy** button. Below your fields, AutoCards always appends a fixed block (in English, for the model). It contains:
 - how many cards to generate;
 - the languages, when set;

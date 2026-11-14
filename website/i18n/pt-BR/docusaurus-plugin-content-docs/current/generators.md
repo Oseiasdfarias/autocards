@@ -40,6 +40,11 @@ O prompt é montado a partir de **campos**, cada um descrevendo um aspecto do ca
 - **+ Adicionar campo próprio** para qualquer outra coisa, com o nome que quiser.
 - Os marcadores `{topic}`, `{level}`, `{target_lang}` e `{native_lang}` são trocados pelos valores da aba Básico.
 
+![Nome de um campo próprio](/img/screens/pt-BR/custom-field.png)
+
+*Nome de um campo próprio*
+
+
 A caixa **Prompt final** mostra exatamente o que é enviado, ao vivo e só para leitura, com um botão **Copiar**. Depois dos seus campos, o AutoCards sempre acrescenta um bloco fixo (em inglês, para o modelo). Ele traz:
 - quantos cards gerar;
 - as línguas, quando definidas;

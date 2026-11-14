@@ -21,9 +21,19 @@ Open **Tools › AutoCards › Generators…**. The first time, the **setup assi
 
 You can change services later in **Tools › AutoCards › Services…**.
 
+![The last page of the assistant](/img/screens/en/wizard-3.png)
+
+*The last page of the assistant*
+
+
 ## 2. Create a generator
 
 Click **+ New generator** and pick a starter template:
+
+![Choosing the starter template](/img/screens/en/template-picker.png)
+
+*Choosing the starter template*
+
 
 | Template | Good for | Defaults |
 |---|---|---|
@@ -43,6 +53,11 @@ Then, on the **Basic** tab, fill in what you want to study, the level, the cards
 
 Click **Test: generate 1 sample card**. AutoCards shows a card made with your current settings, plays the audio if there is any, and **does not add it to Anki**. It is also the quickest way to check that your key works.
 
+![A sample card: nothing is added to Anki](/img/screens/en/test-result.png)
+
+*A sample card: nothing is added to Anki*
+
+
 ## 4. Save and let it run
 
 Click **Save**. From now on, each time your profile opens:
@@ -52,6 +67,11 @@ Click **Save**. From now on, each time your profile opens:
 - a notice shows the result, for example `Daily English: 6 new · Interview: 3 new · 2 waiting for review`.
 
 To run it right away, use **Generate now** (in the dialog or in the menu).
+
+![The notice at the end of a run](/img/screens/en/notice.png)
+
+*The notice at the end of a run*
+
 
 :::tip Start small
 The **Increase gradually** rule is on by default: a new generator starts with 2 cards a day and reaches 10 after 4 weeks. Change it on the [Rules](rules.md) tab.

@@ -42,6 +42,11 @@ AutoCards refuses, with a clear message:
 - files from a newer, unsupported format version;
 - files with wrong field types.
 
+![A file that isn't a generator](/img/screens/en/import-invalid.png)
+
+*A file that isn't a generator*
+
+
 Numbers are limited to the same ranges the settings screen allows.
 
 If you have no text service yet, **Import…** opens the setup assistant first.

@@ -39,6 +39,12 @@ Se o áudio de um card falhar, o card entra mesmo assim, sem áudio, e o erro va
 
 Todo serviço tem o botão **Testar conexão**. O de texto é conferido listando os modelos; o de áudio, falando "Hello".
 
+![Testar conexão: sucesso, e uma chave errada](/img/screens/pt-BR/connection-ok.png)
+![Testar conexão: sucesso, e uma chave errada](/img/screens/pt-BR/connection-fail.png)
+
+*Testar conexão: sucesso, e uma chave errada*
+
+
 ## Custos
 
 Você paga os serviços direto, com a sua conta.

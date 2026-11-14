@@ -42,6 +42,11 @@ O AutoCards recusa, com uma mensagem clara:
 - arquivos de uma versão de formato mais nova, que ele ainda não suporta;
 - arquivos com campos de tipo errado.
 
+![Um arquivo que não é de gerador](/img/screens/pt-BR/import-invalid.png)
+
+*Um arquivo que não é de gerador*
+
+
 Os números ficam limitados às mesmas faixas que a tela de configuração aceita.
 
 Se você ainda não tem serviço de texto, **Importar…** abre antes o assistente de configuração.
