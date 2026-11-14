@@ -16,6 +16,22 @@ from .paths import CONFIG_PATH
 from .phases import run_phases
 
 HOUR_MS = 3600 * 1000
+RETRY_SOON_MS = 2 * 60 * 1000  # rede costuma demorar a subir logo após ligar o computador
+_NET_MARKERS = ("network error", "Failed to resolve", "Name or service not known", "timed out",
+                "Connection refused", "Max retries exceeded")
+
+
+def _is_network(msg: str) -> bool:
+    return any(m in (msg or "") for m in _NET_MARKERS)
+
+
+def should_retry_soon(results: list[RunResult]) -> bool:
+    return any(r.status == "error" and _is_network(r.message) for r in results)
+
+
+def _short_reason(msg: str) -> str:
+    text = (msg or "").split(": ", 1)[-1] if (msg or "").startswith(("LLMError", "TTSError")) else (msg or "")
+    return text.split("(", 1)[0].strip()[:80] or "?"
 _state = {"running": False, "abort": False, "timer": None}
 
 
@@ -69,7 +85,10 @@ def summarize(results: list[RunResult], pending: int = 0) -> tuple[str, bool]:
             parts.append(tr("summary.blocked", name=r.generator_name, reason=r.message))
         elif r.status == "error":
             had_error = True
-            parts.append(tr("summary.failed", name=r.generator_name))
+            if _is_network(r.message):
+                parts.append(tr("summary.failed_net", name=r.generator_name))
+            else:
+                parts.append(tr("summary.failed_reason", name=r.generator_name, reason=_short_reason(r.message)))
     if parts and pending:
         parts.append(tr("summary.pending", n=pending))
     return " · ".join(parts), had_error
@@ -110,6 +129,9 @@ def run_due(force: bool = False, only: str | None = None, quiet_if_nothing: bool
                 tooltip(tr("summary.nothing"))
             return
         tooltip(text, period=10000)
+        if should_retry_soon(results) and not force:
+            from aqt.qt import QTimer
+            QTimer.singleShot(RETRY_SOON_MS, _safe_run_due)
         if any(r.inserted for r in results):
             mw.reset()
         _post_run(cfg.post_run_command, not had_error, text)

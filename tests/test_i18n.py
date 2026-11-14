@@ -45,3 +45,28 @@ class CompletenessTest(unittest.TestCase):
     def test_pt_complete(self):
         missing = set(i18n.STRINGS["en"]) - set(i18n.STRINGS["pt"]) - {"menu.title", "common.ok"}
         self.assertEqual(missing, set())
+
+
+class NetworkFailureTest(unittest.TestCase):
+    def setUp(self):
+        from addon.ankiops.runner import RunResult
+        self.net = RunResult("Entrevista", "error", 0, "LLMError: network error: HTTPSConnectionPool(...) "
+                             "Failed to resolve 'api.openai.com'")
+        self.other = RunResult("Inglês", "error", 0, "LLMError: HTTP 401: invalid key")
+
+    def test_network_failure_reason_and_retry_shown(self):
+        from addon.gui.scheduler import summarize
+        text, err = summarize([self.net])
+        self.assertTrue(err)
+        self.assertIn("no internet", text)
+        self.assertIn("2 min", text)
+
+    def test_other_failure_shows_short_reason(self):
+        from addon.gui.scheduler import summarize
+        text, _ = summarize([self.other])
+        self.assertIn("HTTP 401", text)
+
+    def test_retry_soon_only_for_network(self):
+        from addon.gui.scheduler import should_retry_soon
+        self.assertTrue(should_retry_soon([self.net]))
+        self.assertFalse(should_retry_soon([self.other]))
