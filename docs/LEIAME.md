@@ -10,7 +10,6 @@ Add-on do Anki que cria cards novos todo dia, sozinho, com IA. Cada pessoa confi
 |---|---|
 | [`docs/superpowers/specs/2026-11-10-autocards-design.md`](superpowers/specs/2026-11-10-autocards-design.md) | Documento de desenho: o que é, por quê, comportamento, telas, fases |
 | [`docs/mockups/`](mockups/) | Rascunhos de tela aprovados: escolha da tela (B), aba Prompt, aba Regras |
-| [`docs/reference/sistemas-atuais.md`](reference/sistemas-atuais.md) | Os três sistemas que o add-on substitui e o que reaproveitar deles |
 | [`docs/research/2026-11-10-mercado.md`](research/2026-11-10-mercado.md) | Concorrentes, mercado brasileiro e licença |
 
 | [`docs/superpowers/plans/`](superpowers/plans/) | Planos de implementação |

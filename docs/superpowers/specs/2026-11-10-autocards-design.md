@@ -19,7 +19,7 @@ Um add-on do Anki que **cria cards novos todo dia, sozinho, usando IA**. Cada pe
 
 **Por que existe:**
 
-1. **Para o dono, agora.** Ele tem três sistemas separados que geram cards por fora do Anki, via AnkiConnect e timers do systemd (ver [`docs/reference/sistemas-atuais.md`](../../reference/sistemas-atuais.md)). Só o de inglês funciona, justamente o único que não depende de escrita manual. Os três repetem o mesmo código: conector, abertura do Anki e controle de repetição. O add-on substitui os três.
+1. **Para o dono, agora.** Ele tem três sistemas separados que geram cards por fora do Anki, via AnkiConnect e timers do systemd (ver o levantamento em `autocards-privado/reference/sistemas-atuais.md`, fora do repositório, ao lado da pasta do projeto). Só o de inglês funciona, justamente o único que não depende de escrita manual. Os três repetem o mesmo código: conector, abertura do Anki e controle de repetição. O add-on substitui os três.
 2. **Prática real com LLM.** Montar prompts, lidar com JSON de vários serviços, controlar custo e **medir a qualidade do que a IA gera** é a experiência prática de engenharia de LLM que o dono quer ganhar.
 3. **Comunidade e renda extra.** O add-on é publicado de graça para o mundo todo. Depois vêm um curso, ensinando a configurar, e pacotes de geradores prontos por tema, vendidos fora do AnkiWeb (seção 12).
 
@@ -84,7 +84,7 @@ Um add-on do Anki que **cria cards novos todo dia, sozinho, usando IA**. Cada pe
 - **Não travar a interface.** Toda chamada de rede roda em segundo plano, usando o mecanismo de tarefas em segundo plano do Anki. A escrita na coleção segue as regras de thread do Anki.
 - **Licença AGPL3** **[desenho]**, exigida para add-ons do AnkiWeb, segundo o fórum oficial (ver a pesquisa).
 - **Linux, Windows e Mac.** O dono usa Linux, mas o público é mundial.
-- **Repositório privado até a publicação** **[dono]**. `docs/reference/` tem detalhes da máquina e dos estudos do dono. Antes da fase 2, esses documentos saem do repositório (e do histórico), e só então ele vira público.
+- **Repositório privado até a publicação** **[dono]**. `docs/reference/` tinha detalhes da máquina e dos estudos do dono. Feito em 14/11/2026: esses documentos saíram do repositório (e do histórico), e só então ele vira público.
 - **Interface em inglês, com português como segunda língua** **[dono]**. Todo texto da tela passa por um mecanismo de tradução desde o início.
 - **Não depender dos nomes de campo do idioma do Anki.** O sistema de entrevista atual quebraria num Anki em português, porque fixa `Front`/`Back`. Ver seção 7.3.
 
@@ -235,7 +235,7 @@ Separada dos geradores. Guarda cada conexão uma vez só **[dono]**.
 
 ## 11. Migração dos sistemas do dono
 
-Detalhes em [`docs/reference/sistemas-atuais.md`](../../reference/sistemas-atuais.md).
+Detalhes no levantamento em `autocards-privado/reference/sistemas-atuais.md`, fora do repositório, ao lado da pasta do projeto.
 
 ### 11.1 Primeiro em paralelo, depois a troca **[dono]**
 
