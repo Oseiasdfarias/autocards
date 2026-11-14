@@ -8,11 +8,12 @@ import tempfile
 from datetime import date
 
 from aqt import mw
-from aqt.qt import (QApplication, QCheckBox, QComboBox, QDialog, QDoubleSpinBox, QFormLayout, QHBoxLayout,
+from aqt.qt import (QApplication, QCheckBox, QComboBox, QDialog, QDoubleSpinBox, QFileDialog, QFormLayout,
+                    QHBoxLayout,
                     QInputDialog, QLabel, QLineEdit, QListWidget, QMessageBox, QPlainTextEdit, QPushButton,
                     QSpinBox, QTabWidget, QVBoxLayout, QWidget)
 
-from ..core import config_store, prompt, rules as rules_mod, templates
+from ..core import config_store, exchange, prompt, rules as rules_mod, templates
 from ..core.i18n import tr
 from ..core.model import Generator, Rules
 from ..core.tts import EDGE_VOICES, OPENAI_VOICES, make_tts
@@ -58,10 +59,14 @@ class GeneratorsDialog(QDialog):
         new_btn.clicked.connect(self._ask_new)
         del_btn = QPushButton(tr("common.delete"))
         del_btn.clicked.connect(self._delete)
+        exp_btn = QPushButton(tr("gen.export"))
+        exp_btn.clicked.connect(self._ask_export)
+        imp_btn = QPushButton(tr("gen.import"))
+        imp_btn.clicked.connect(self._ask_import)
         left = QVBoxLayout()
         left.addWidget(self.list)
-        left.addWidget(new_btn)
-        left.addWidget(del_btn)
+        for b in (new_btn, imp_btn, exp_btn, del_btn):
+            left.addWidget(b)
 
         self.tabs = QTabWidget()
         self.tabs.addTab(self._basic_tab(), tr("gen.tab.basic"))
@@ -413,6 +418,46 @@ class GeneratorsDialog(QDialog):
         label, ok = QInputDialog.getItem(self, tr("gen.new"), tr("gen.pick_template"), labels, 0, False)
         if ok:
             self.new_from_template(TEMPLATE_KEYS[labels.index(label)])
+
+    def add_generator(self, g: Generator) -> None:
+        self._store_form()
+        self.cfg.generators.append(g)
+        self._refresh_list()
+        self.tabs.setEnabled(True)
+        self.list.setCurrentRow(len(self.cfg.generators) - 1)
+
+    def export_current(self, path: str) -> None:
+        self._store_form()
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(exchange.export_generator(self.current), f, ensure_ascii=False, indent=2)
+
+    def _ask_export(self) -> None:
+        if self.current is None:
+            return
+        name = "".join(c if c.isalnum() else "-" for c in self.current.name).strip("-") or "generator"
+        default = os.path.join(os.path.expanduser("~"), name + exchange.EXTENSION)
+        path, _ = QFileDialog.getSaveFileName(self, tr("gen.export"), default, f"AutoCards (*{exchange.EXTENSION})")
+        if path:
+            self.export_current(path)
+
+    def _ask_import(self) -> None:
+        from .import_dialog import ImportDialog
+        path, _ = QFileDialog.getOpenFileName(self, tr("gen.import"), os.path.expanduser("~"),
+                                              f"AutoCards (*{exchange.EXTENSION} *.json)")
+        if not path:
+            return
+        if not self._services("text"):
+            QMessageBox.information(self, tr("gen.title"), tr("gen.no_services"))
+            return
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+            dialog = ImportDialog(self, self.cfg, data)
+        except (OSError, ValueError, exchange.ExchangeError) as e:
+            QMessageBox.warning(self, tr("gen.import"), str(e))
+            return
+        if dialog.exec():
+            self.add_generator(dialog.build())
 
     def _delete(self) -> None:
         row = self.list.currentRow()

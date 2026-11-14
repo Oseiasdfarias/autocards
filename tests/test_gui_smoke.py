@@ -112,6 +112,26 @@ class GeneratorsDialogSmoke(GuiSmokeBase):
         d.save()
         self.assertEqual(config_store.load(self.path).generators[0].voice, "")
 
+    def test_export_then_import(self):
+        import json as _json
+        from addon.gui.import_dialog import ImportDialog
+        d = self.make()
+        d.new_from_template("interview")
+        d.topic.setText("RAG systems")
+        out = os.path.join(self.tmp.name, "gen.autocards.json")
+        d.export_current(out)
+        with open(out, encoding="utf-8") as f:
+            data = _json.load(f)
+        self.assertNotIn("text_service_id", data["generator"])
+        imp = ImportDialog(d, d.cfg, data)
+        imp.deck.setEditText("Imported::Deck")
+        d.add_generator(imp.build())
+        d.save()
+        gens = config_store.load(self.path).generators
+        self.assertEqual(len(gens), 2)
+        self.assertEqual((gens[1].deck, gens[1].topic, gens[1].text_service_id), ("Imported::Deck", "RAG systems", "t"))
+        self.assertNotEqual(gens[0].id, gens[1].id)
+
     def test_preview_renders_topic_and_fixed_block(self):
         d = self.make()
         d.new_from_template("concepts")
