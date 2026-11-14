@@ -49,6 +49,8 @@ class Prepared:
     model: str
     started: float
     reinforce_nids: list[int] = field(default_factory=list)
+    topics_used: int = 0
+    topics_finished: bool = False
     # preenchidos por fetch
     cards: list[dict] = field(default_factory=list)
     audio: list[tuple[bytes | None, str | None]] = field(default_factory=list)
@@ -112,13 +114,19 @@ def prepare(col, cfg: AppConfig, gen: Generator, store: Store, today: date, forc
                                       min(gen.rules.reinforce_per_day, count))
         if reinforce:
             extras.append(prompt.reinforcement_block([dedupe.normalize(f) for _n, f in reinforce], len(reinforce)))
+    topics: list[str] = []
+    r = gen.rules
+    if r.topics_enabled and r.topics_next < len(r.topics):
+        topics = r.topics[r.topics_next:r.topics_next + max(1, r.topics_per_day)]
+        extras.append("Generate the cards about these topics, in order:\n" + "\n".join(f"- {t}" for t in topics))
     has_r = bool(reinforce)
     messages = prompt.build_messages(gen, count, [x for x in sample if x], extras, reinforcement=has_r)
     return Prepared(cfg=cfg, gen=gen, svc=svc, run_id=run_id, today=today, is_test=is_test, count=count,
                     existing_all=existing_all, messages=messages,
                     schema=prompt.response_schema(gen.card_format, gen.context_field, has_r),
                     model=gen.text_model or svc.default_model, started=started,
-                    reinforce_nids=[n for n, _f in reinforce])
+                    reinforce_nids=[n for n, _f in reinforce], topics_used=len(topics),
+                    topics_finished=bool(topics) and r.topics_next + len(topics) >= len(r.topics))
 
 
 def fetch(prep: Prepared, chat=chat_cards, tts_factory=make_tts, should_abort=lambda: False) -> Prepared:
@@ -211,7 +219,9 @@ def commit(col, prep: Prepared, store: Store, should_abort=lambda: False) -> Run
         col.tags.bulk_add(prep.reinforce_nids, REINFORCED_TAG)
     store.finish_run(prep.run_id, status="ok", **_finish_fields(prep, inserted))
     gen.last_success = prep.today.isoformat()
-    return RunResult(gen.name, "ok", inserted, f"{inserted} new")
+    gen.rules.topics_next += prep.topics_used
+    msg = f"{inserted} new" + ("; topic list finished" if prep.topics_finished else "")
+    return RunResult(gen.name, "ok", inserted, msg)
 
 
 def run_generator(col, cfg: AppConfig, gen: Generator, store: Store, today: date, force: bool = False,

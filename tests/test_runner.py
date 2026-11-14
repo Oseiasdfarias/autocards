@@ -207,6 +207,40 @@ class ReinforceTest(RunnerBase):
         self.assertNotIn("Reinforcement", chat.calls[0][1]["content"])
 
 
+class TopicsTest(RunnerBase):
+    def tgen(self):
+        return make_gen(rules=Rules(ramp_enabled=False, topics_enabled=True, topics=["alpha", "beta", "gamma"],
+                                    topics_per_day=2))
+
+    def day(self, gen, n, chat):
+        from datetime import timedelta
+        self.cfg.generators = [gen]
+        return runner.run_generator(self.col, self.cfg, gen, self.store, TODAY + timedelta(days=n), chat=chat,
+                                    tts_factory=lambda s: FakeTTS())
+
+    def test_topics_consumed_in_order_then_theme_only(self):
+        gen = self.tgen()
+        c1 = FakeChat([{"front": "q1", "back": "1"}])
+        self.day(gen, 0, c1)
+        self.assertIn("- alpha\n- beta", c1.calls[0][1]["content"])
+        self.assertEqual(gen.rules.topics_next, 2)
+        c2 = FakeChat([{"front": "q2", "back": "1"}])
+        r2 = self.day(gen, 1, c2)
+        block = c2.calls[0][1]["content"]
+        self.assertIn("- gamma", block)
+        self.assertNotIn("- alpha", block)
+        self.assertIn("topic list finished", r2.message)
+        c3 = FakeChat([{"front": "q3", "back": "1"}])
+        r3 = self.day(gen, 2, c3)
+        self.assertNotIn("these topics", c3.calls[0][1]["content"])
+        self.assertNotIn("topic list finished", r3.message)
+
+    def test_failure_does_not_advance(self):
+        gen = self.tgen()
+        self.day(gen, 0, FakeChat(error=LLMError("offline")))
+        self.assertEqual(gen.rules.topics_next, 0)
+
+
 class PhasesTest(RunnerBase):
     """C1: a rede roda numa fase sem a coleção; I1: abortar não gasta nem fecha o dia."""
 

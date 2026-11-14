@@ -83,8 +83,10 @@ class RunStateMergeTest(unittest.TestCase):
             ran = sample_config()
             ran.generators[0].last_success = "2026-11-13"
             ran.generators[0].attempts_today = {"2026-11-13": 1}
+            ran.generators[0].rules.topics_next = 4
             config_store.update_run_state(path, ran.generators)
             loaded = config_store.load(path)
+            self.assertEqual(loaded.generators[0].rules.topics_next, 4)
             self.assertEqual(loaded.generators[0].name, "Renamed by user")
             self.assertEqual(loaded.generators[0].last_success, "2026-11-13")
             self.assertEqual(loaded.generators[0].attempts_today, {"2026-11-13": 1})
