@@ -18,9 +18,11 @@ class ImportDialog(QDialog):
         info = exchange.summary(data)  # levanta ExchangeError se o arquivo não serve
         self.setWindowTitle(tr("import.title"))
         form = QFormLayout(self)
+        cap = info["spend_cap_usd"]
         form.addRow(QLabel(tr("import.summary", name=info["name"], fields=info["fields"],
                               format=info["format"], audio=tr("common.yes") if info["audio"] else tr("common.no"),
-                              rules=", ".join(info["rules"]) or "—")))
+                              rules=", ".join(info["rules"]) or "—", per_day=info["cards_per_day"],
+                              cap=f"US$ {cap:.2f}" if cap is not None else tr("import.no_cap"))))
         self.deck = QComboBox()
         self.deck.setEditable(True)
         if mw is not None and mw.col is not None:
@@ -46,6 +48,14 @@ class ImportDialog(QDialog):
         form.addRow(buttons)
 
     def build(self) -> Generator:
-        return exchange.import_generator(self.data, self.deck.currentText().strip() or "AutoCards",
-                                         self.text_service.currentData() or "",
-                                         self.audio_service.currentData() or "", date.today())
+        from .generator_dialog import default_voice, voices_for
+        g = exchange.import_generator(self.data, self.deck.currentText().strip() or "AutoCards",
+                                      self.text_service.currentData() or "",
+                                      self.audio_service.currentData() or "", date.today())
+        svc = self.cfg.service(g.audio_service_id)
+        options = voices_for(svc.provider) if svc else []
+        if svc and ((options and g.voice not in options) or (not options and svc.provider != "elevenlabs")):
+            g.voice = default_voice(svc.provider)  # voz do arquivo é de outro serviço
+        elif svc and svc.provider == "elevenlabs" and g.voice in voices_for("edge") + voices_for("openai"):
+            g.voice = ""
+        return g

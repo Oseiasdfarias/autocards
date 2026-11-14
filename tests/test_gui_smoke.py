@@ -187,6 +187,20 @@ class SetupWizardSmoke(unittest.TestCase):
         self.assertEqual(len([s for s in cfg.services if s.kind == "tts"]), 1)
         self.assertEqual(len([s for s in cfg.services if s.kind == "text"]), 2)
 
+    def test_wizard_requires_key_for_paid_service(self):
+        from addon.gui.setup_wizard import SetupWizard
+        w = SetupWizard(None, AppConfig())
+        w.preset = "OpenAI"
+        w.key.setEnabled(True)
+        w.key.setText("")
+        self.assertFalse(w.key_page_ok())
+        w.key.setText("sk-1")
+        self.assertTrue(w.key_page_ok())
+        w.preset = "Ollama (local)"
+        w.key.setEnabled(False)
+        w.key.setText("")
+        self.assertTrue(w.key_page_ok())
+
     def test_wizard_builds(self):
         from addon.gui.setup_wizard import SetupWizard
         w = SetupWizard(None, AppConfig())

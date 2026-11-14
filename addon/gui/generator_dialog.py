@@ -96,12 +96,9 @@ class GeneratorsDialog(QDialog):
         root.addLayout(top)
         root.addLayout(bottom)
 
-        from .setup_wizard import SetupWizard, needs_setup
+        from .setup_wizard import needs_setup
         if needs_setup(self.cfg) and mw is not None:  # primeira vez: configuração guiada
-            if SetupWizard(self, self.cfg).exec():
-                disk = config_store.load(CONFIG_PATH)
-                disk.services = self.cfg.services
-                config_store.save(CONFIG_PATH, disk)
+            self._run_setup()
         self._fill_service_combos()
         self._refresh_list()
         self.tabs.setEnabled(bool(self.cfg.generators))
@@ -425,6 +422,17 @@ class GeneratorsDialog(QDialog):
         if ok:
             self.new_from_template(TEMPLATE_KEYS[labels.index(label)])
 
+    def _run_setup(self) -> bool:
+        from .setup_wizard import SetupWizard
+        if not SetupWizard(self, self.cfg).exec():
+            return False
+        disk = config_store.load(CONFIG_PATH)
+        disk.services = self.cfg.services
+        config_store.save(CONFIG_PATH, disk)
+        if hasattr(self, "text_service"):
+            self._fill_service_combos()
+        return True
+
     def add_generator(self, g: Generator) -> None:
         self._store_form()
         self.cfg.generators.append(g)
@@ -452,15 +460,14 @@ class GeneratorsDialog(QDialog):
                                               f"AutoCards (*{exchange.EXTENSION} *.json)")
         if not path:
             return
-        if not self._services("text"):
-            QMessageBox.information(self, tr("gen.title"), tr("gen.no_services"))
+        if not self._services("text") and not self._run_setup():
             return
         try:
             with open(path, encoding="utf-8") as f:
                 data = json.load(f)
             dialog = ImportDialog(self, self.cfg, data)
-        except (OSError, ValueError, exchange.ExchangeError) as e:
-            QMessageBox.warning(self, tr("gen.import"), str(e))
+        except Exception as e:  # arquivo de terceiros: qualquer defeito vira aviso, nunca erro do Anki
+            QMessageBox.warning(self, tr("gen.import"), tr("import.invalid", err=str(e)[:300]))
             return
         if dialog.exec():
             self.add_generator(dialog.build())

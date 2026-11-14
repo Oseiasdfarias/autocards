@@ -56,6 +56,50 @@ class ExchangeTest(unittest.TestCase):
         b = exchange.import_generator(data, "D", "t", "", TODAY)
         self.assertNotEqual(a.id, b.id)
 
+    def test_extra_fields_never_exported_or_imported(self):  # I1
+        g = source()
+        g.extra = {"api_key": "SECRET"}
+        g.rules.extra = {"token": "SECRET2"}
+        data = exchange.export_generator(g)
+        self.assertNotIn("SECRET", json.dumps(data))
+        data["generator"]["sneaky"] = 1
+        data["generator"]["rules"]["sneaky"] = 2
+        imp = exchange.import_generator(data, "D", "t", "", TODAY)
+        self.assertEqual((imp.extra, imp.rules.extra), ({}, {}))
+
+    def test_wrong_types_rejected(self):  # I2
+        base = exchange.export_generator(source())
+        for path, value in ((("cards_per_day",), "9"), (("name",), {"x": 1}), (("rules",), []),
+                            (("prompt_fields",), 3), (("rules", "weekdays"), "x"),
+                            (("prompt_fields", 0, "text"), 5), (("audio_enabled",), "yes")):
+            data = json.loads(json.dumps(base))
+            target = data["generator"]
+            for k in path[:-1]:
+                target = target[k]
+            target[path[-1]] = value
+            with self.subTest(path=path):
+                with self.assertRaises(exchange.ExchangeError):
+                    exchange.summary(data)
+                with self.assertRaises(exchange.ExchangeError):
+                    exchange.import_generator(data, "D", "t", "", TODAY)
+
+    def test_numbers_clamped(self):  # I2
+        data = exchange.export_generator(source())
+        data["generator"]["cards_per_day"] = 10 ** 12
+        data["generator"]["rules"]["brake_limit"] = -5
+        g = exchange.import_generator(data, "D", "t", "", TODAY)
+        self.assertEqual((g.cards_per_day, g.rules.brake_limit), (200, 0))
+
+    def test_model_not_imported_and_summary_shows_volume(self):  # I3
+        src = source()
+        src.text_model = "o1-pro"
+        src.cards_per_day = 50
+        data = exchange.export_generator(src)
+        self.assertEqual(exchange.import_generator(data, "D", "t", "", TODAY).text_model, "")
+        s = exchange.summary(data)
+        self.assertEqual(s["cards_per_day"], 50)
+        self.assertIn("spend_cap_usd", s)
+
     def test_summary(self):
         s = exchange.summary(exchange.export_generator(source()))
         self.assertEqual(s["name"], "Daily English")

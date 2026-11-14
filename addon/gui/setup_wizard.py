@@ -110,6 +110,15 @@ class SetupWizard(QWizard):
 
         mw.taskman.run_in_background(lambda: test_service(svc), done)
 
+    def key_page_ok(self) -> bool:
+        return not self.key.isEnabled() or bool(self.key.text().strip())
+
+    def validateCurrentPage(self) -> bool:
+        if self.currentId() == 1 and not self.key_page_ok():
+            self.test_result.setText("✗ " + tr("wizard.key_required"))
+            return False
+        return super().validateCurrentPage()
+
     def accept(self) -> None:
         apply_setup(self.cfg, self.preset, self.key.text() if self.key.isEnabled() else "")
         super().accept()
