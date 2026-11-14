@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rascunho da aba Prompt</title>
+<style>
+  :root{--bg:#1e1f22;--win:#2b2d31;--panel:#232428;--line:#3a3c42;--txt:#e6e6e6;--mut:#9aa0a6;--acc:#5b8def;--ok:#3fb27f;--warn:#e0a84a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.45 system-ui,sans-serif;padding:24px 16px}
+  .wrap{max-width:1100px;margin:0 auto}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--mut);margin:0 0 20px}
+  .win{background:var(--win);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 8px 30px #0006}
+  .bar{background:var(--panel);padding:8px 12px;color:var(--mut);font-size:12px;border-bottom:1px solid var(--line)}
+  .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);padding:0 16px;background:var(--win)}
+  .tab{padding:10px 14px;color:var(--mut);border-bottom:2px solid transparent}
+  .tab.on{color:var(--txt);border-color:var(--acc)}
+  .body{display:flex;gap:0}
+  .fields{flex:1.2;padding:16px 20px;min-width:0;border-right:1px solid var(--line)}
+  .final{flex:1;padding:16px 20px;background:var(--panel);min-width:0}
+  .f{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px;background:#26282c}
+  .f .h{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .f .h b{flex:1}
+  .f .h .g{color:var(--mut);cursor:grab;letter-spacing:-2px}
+  .f .h .sw{width:30px;height:16px;border-radius:9px;background:var(--acc);position:relative}
+  .f .h .sw::after{content:"";position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff}
+  .f.off{opacity:.5}
+  .f.off .sw{background:#555}.f.off .sw::after{right:auto;left:2px}
+  .f .help{color:var(--mut);font-size:12px;margin-bottom:6px}
+  .ta{background:#1b1c1f;border:1px solid var(--line);border-radius:6px;padding:7px 9px;white-space:pre-wrap;min-height:38px}
+  .add{color:var(--acc);padding:8px 2px}
+  .final h3{margin:0 0 4px;font-size:14px}
+  .final .help{color:var(--mut);font-size:12px;margin-bottom:8px}
+  pre{background:#16171a;border:1px solid var(--line);border-radius:8px;padding:12px;white-space:pre-wrap;font:12.5px/1.5 ui-monospace,monospace;color:#d6d6d6;margin:0}
+  pre .k{color:#8fb4ff}
+  pre .s{color:var(--mut)}
+  .btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+  .b{border:1px solid var(--line);background:#33353b;color:var(--txt);border-radius:6px;padding:7px 14px}
+  .b.t{background:#2d3a33;border-color:var(--ok)}
+  .note{color:var(--mut);border-left:3px solid var(--warn);padding-left:12px;margin-top:20px}
+  @media (max-width:800px){.body{flex-direction:column}.fields{border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Aba Prompt: campos que viram um prompt só</h1>
+  <p class="sub">Esquerda: cada campo descreve um aspecto do card. Direita: o prompt final, montado ao vivo juntando os campos na ordem. Dá para arrastar (⋮⋮) para reordenar e desligar um campo sem apagar o texto.</p>
+
+  <div class="win">
+    <div class="bar">Ferramentas › Cards automáticos › Inglês do dia a dia</div>
+    <div class="tabs"><div class="tab">Básico</div><div class="tab on">Prompt</div><div class="tab">Formato e áudio</div><div class="tab">Regras</div></div>
+    <div class="body">
+      <div class="fields">
+        <div class="f"><div class="h"><span class="g">⋮⋮</span><b>Papel da IA</b><span class="sw"></span></div>
+          <div class="help">Quem a IA deve ser ao escrever os cards.</div>
+          <div class="ta">Você é um professor de inglês que prepara brasileiros para trabalhar em times remotos de tecnologia.</div></div>
+
+        <div class="f"><div class="h"><span class="g">⋮⋮</span><b>Tema</b><span class="sw"></span></div>
+          <div class="help">Sobre o que são os cards.</div>
+          <div class="ta">Situações de trabalho remoto: reuniões diárias, code review, pedir ajuda, explicar um atraso.</div></div>
+
+        <div class="f"><div class="h"><span class="g">⋮⋮</span><b>Nível e público</b><span class="sw"></span></div>
+          <div class="help">Para quem é, e o quanto já sabe.</div>
+          <div class="ta">Intermediário. Lê documentação técnica, mas trava ao falar.</div></div>
+
+        <div class="f"><div class="h"><span class="g">⋮⋮</span><b>Frente do card</b><span class="sw"></span></div>
+          <div class="ta">A frase em português, como eu diria no dia a dia.</div></div>
+
+        <div class="f"><div class="h"><span class="g">⋮⋮</span><b>Verso do card</b><span class="sw"></span></div>
+          <div class="ta">A frase em inglês natural, no máximo 15 palavras.</div></div>
+
+        <div class="f"><div class="h"><span class="g">⋮⋮</span><b>O que evitar</b><span class="sw"></span></div>
+          <div class="ta">Gírias muito regionais. Frases de livro didático que ninguém fala.</div></div>
+
+        <div class="f off"><div class="h"><span class="g">⋮⋮</span><b>Exemplos de cards bons</b><span class="sw"></span></div>
+          <div class="help">Desligado: o texto fica guardado, mas não entra no prompt.</div>
+          <div class="ta">Frente: Pode revisar meu PR? → Verso: Could you review my PR?</div></div>
+
+        <div class="add">+ Adicionar campo próprio (você dá o nome)</div>
+      </div>
+
+      <div class="final">
+        <h3>Prompt final</h3>
+        <div class="help">Só leitura. É exatamente o que vai para a IA.</div>
+<pre><span class="k">## Papel</span>
+Você é um professor de inglês que prepara brasileiros para trabalhar em times remotos de tecnologia.
+
+<span class="k">## Tema</span>
+Situações de trabalho remoto: reuniões diárias, code review, pedir ajuda, explicar um atraso.
+
+<span class="k">## Nível e público</span>
+Intermediário. Lê documentação técnica, mas trava ao falar.
+
+<span class="k">## Frente do card</span>
+A frase em português, como eu diria no dia a dia.
+
+<span class="k">## Verso do card</span>
+A frase em inglês natural, no máximo 15 palavras.
+
+<span class="k">## O que evitar</span>
+Gírias muito regionais. Frases de livro didático que ninguém fala.
+
+<span class="s">## (adicionado pelo add-on, não editável)
+Gere 10 cards. Não repita estes que já existem: [...]
+Responda no formato JSON: frente, verso.</span></pre>
+        <div class="btns"><span class="b">Copiar</span><span class="b t">Testar: gerar 1 card de exemplo</span></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">Palpite meu: o trecho cinza no fim do prompt (quantidade, lista do que já existe, formato da resposta) o add-on coloca sozinho, porque se o usuário apagar isso o add-on quebra. O resto é todo do usuário.</p>
+</div>
+</body>
+</html>

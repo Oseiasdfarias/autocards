@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rascunho da aba Regras</title>
+<style>
+  :root{--bg:#1e1f22;--win:#2b2d31;--panel:#232428;--line:#3a3c42;--txt:#e6e6e6;--mut:#9aa0a6;--acc:#5b8def;--ok:#3fb27f;--warn:#e0a84a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.45 system-ui,sans-serif;padding:24px 16px}
+  .wrap{max-width:900px;margin:0 auto}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--mut);margin:0 0 20px}
+  .win{background:var(--win);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 8px 30px #0006}
+  .bar{background:var(--panel);padding:8px 12px;color:var(--mut);font-size:12px;border-bottom:1px solid var(--line)}
+  .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);padding:0 16px}
+  .tab{padding:10px 14px;color:var(--mut);border-bottom:2px solid transparent}
+  .tab.on{color:var(--txt);border-color:var(--acc)}
+  .main{padding:8px 20px 20px}
+  h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:18px 0 8px}
+  .r{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px;background:#26282c}
+  .r.off{opacity:.55}
+  .r .h{display:flex;align-items:center;gap:10px}
+  .r .h b{flex:1}
+  .sw{width:30px;height:16px;border-radius:9px;background:var(--acc);position:relative;flex:none}
+  .sw::after{content:"";position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff}
+  .r.off .sw{background:#555}.r.off .sw::after{right:auto;left:2px}
+  .r .d{color:var(--mut);font-size:12.5px;margin:4px 0 0 40px}
+  .r .p{margin:6px 0 0 40px;font-size:13px}
+  .in{display:inline-block;background:#1b1c1f;border:1px solid var(--line);border-radius:5px;padding:1px 8px;min-width:34px;text-align:center}
+  .tag{font-size:11px;border-radius:4px;padding:1px 6px;margin-left:6px}
+  .tag.pad{background:#2d3a33;color:var(--ok)}
+  .tag.v2{background:#3a3326;color:var(--warn)}
+  .note{color:var(--mut);border-left:3px solid var(--warn);padding-left:12px;margin-top:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Aba Regras</h1>
+  <p class="sub">Cada regra liga e desliga. <span class="tag pad">ligada por padrão</span> vem ativa num gerador novo. <span class="tag v2">talvez depois</span> é a minha sugestão de deixar para uma segunda versão.</p>
+
+  <div class="win">
+    <div class="bar">Ferramentas › Cards automáticos › Inglês do dia a dia</div>
+    <div class="tabs"><div class="tab">Básico</div><div class="tab">Prompt</div><div class="tab">Formato e áudio</div><div class="tab on">Regras</div></div>
+    <div class="main">
+
+      <h3>Quanto gerar</h3>
+      <div class="r"><div class="h"><span class="sw"></span><b>Aumentar aos poucos</b><span class="tag pad">ligada por padrão</span></div>
+        <div class="d">Começa leve e sobe com o tempo, para não assustar no início.</div>
+        <div class="p">Começar com <span class="in">2</span> por dia e chegar a <span class="in">10</span> em <span class="in">8</span> semanas</div></div>
+      <div class="r"><div class="h"><span class="sw"></span><b>Só em alguns dias</b></div>
+        <div class="p">Gerar em: <span class="in">seg</span> <span class="in">ter</span> <span class="in">qua</span> <span class="in">qui</span> <span class="in">sex</span></div></div>
+
+      <h3>Proteções</h3>
+      <div class="r"><div class="h"><span class="sw"></span><b>Frear quando acumular</b><span class="tag pad">ligada por padrão</span></div>
+        <div class="d">O motivo número 1 de largar o Anki é a pilha de atrasados. Se ela crescer, o add-on para de colocar cards novos até você pôr em dia.</div>
+        <div class="p">Não gerar se houver mais de <span class="in">30</span> cards vencidos neste baralho</div></div>
+      <div class="r"><div class="h"><span class="sw"></span><b>Não repetir</b><span class="tag pad">ligada por padrão</span></div>
+        <div class="d">Manda para a IA o que já existe no baralho e descarta cards iguais ou parecidos demais.</div></div>
+      <div class="r"><div class="h"><span class="sw"></span><b>Teto de gasto</b><span class="tag pad">ligada por padrão</span></div>
+        <div class="d">A chave da IA é sua, então o add-on conta quanto já gastou no mês e para ao chegar no limite.</div>
+        <div class="p">Parar ao chegar em US$ <span class="in">2</span> por mês</div></div>
+      <div class="r off"><div class="h"><span class="sw"></span><b>Aprovar antes de entrar</b></div>
+        <div class="d">Os cards gerados ficam numa fila. Você aceita, edita ou descarta cada um antes de ir para o baralho.</div></div>
+
+      <h3>De onde vem o conteúdo</h3>
+      <div class="r"><div class="h"><span class="sw"></span><b>Reforçar o que você erra</b></div>
+        <div class="d">Pega os cards em que você mais erra e pede à IA cards novos sobre o mesmo assunto, explicado de outro jeito.</div>
+        <div class="p">Considerar cards com <span class="in">3</span> ou mais erros · até <span class="in">2</span> por dia</div></div>
+      <div class="r off"><div class="h"><span class="sw"></span><b>Seguir uma lista de tópicos</b></div>
+        <div class="d">Você cola uma lista (um tópico por linha). A cada dia o add-on pega os próximos da lista, em ordem, em vez de a IA escolher. É o seu PLANO.md de entrevista, de forma mais simples.</div>
+        <div class="p">Usar <span class="in">1</span> tópico por dia · lista: <span class="in">editar…</span></div></div>
+      <div class="r off"><div class="h"><span class="sw"></span><b>Ler de um arquivo ou página</b><span class="tag v2">talvez depois</span></div>
+        <div class="d">Gera cards a partir de um texto seu: anotações, um PDF, um artigo.</div></div>
+
+    </div>
+  </div>
+
+  <p class="note">Palpite meu: "Frear quando acumular" e "Reforçar o que você erra" são o que diferencia este add-on de outros geradores de cards com IA, porque usam o histórico de estudo da pessoa, que só existe dentro do Anki.</p>
+</div>
+</body>
+</html>

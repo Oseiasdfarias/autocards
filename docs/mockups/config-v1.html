@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rascunho de configuração</title>
+<style>
+  :root{--bg:#1e1f22;--win:#2b2d31;--panel:#232428;--line:#3a3c42;--txt:#e6e6e6;--mut:#9aa0a6;--acc:#5b8def;--ok:#3fb27f;--warn:#e0a84a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.45 system-ui,sans-serif;padding:24px 16px}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--mut);margin:0 0 24px}
+  .opt{margin:0 auto 48px;max-width:1000px}
+  .opt h2{font-size:17px;margin:0 0 4px}
+  .opt h2 span{display:inline-block;background:var(--acc);color:#fff;border-radius:6px;padding:0 8px;margin-right:8px}
+  .opt p.d{color:var(--mut);margin:0 0 12px}
+  .win{background:var(--win);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 8px 30px #0006}
+  .bar{background:var(--panel);padding:8px 12px;color:var(--mut);font-size:12px;border-bottom:1px solid var(--line)}
+  .body{display:flex;min-height:520px}
+  .side{width:220px;background:var(--panel);border-right:1px solid var(--line);padding:10px}
+  .side .it{padding:8px 10px;border-radius:6px;margin-bottom:4px;cursor:default}
+  .side .it.on{background:#3a4a6b}
+  .side .it small{display:block;color:var(--mut);font-size:11px}
+  .side .add{margin-top:10px;color:var(--acc);padding:8px 10px}
+  .main{flex:1;padding:16px 20px;min-width:0}
+  label{display:block;color:var(--mut);font-size:12px;margin:12px 0 4px}
+  .in,.ta,.sel{width:100%;background:#1b1c1f;border:1px solid var(--line);border-radius:6px;color:var(--txt);padding:7px 9px;font:inherit}
+  .ta{min-height:96px;white-space:pre-wrap}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:140px}
+  .chk{display:flex;align-items:center;gap:8px;margin-top:10px}
+  .box{width:16px;height:16px;border:1px solid var(--line);border-radius:4px;background:#1b1c1f;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+  .box.on{background:var(--acc);border-color:var(--acc)}
+  .btns{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+  .b{border:1px solid var(--line);background:#33353b;color:var(--txt);border-radius:6px;padding:7px 14px}
+  .b.p{background:var(--acc);border-color:var(--acc)}
+  .b.t{background:#2d3a33;border-color:var(--ok)}
+  .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:-4px 0 8px}
+  .tab{padding:8px 14px;color:var(--mut);border-bottom:2px solid transparent}
+  .tab.on{color:var(--txt);border-color:var(--acc)}
+  .card{background:#fff;color:#111;border-radius:8px;padding:14px;margin-top:8px;font-size:14px}
+  .card hr{border:0;border-top:1px solid #ddd}
+  .card .au{color:#5b8def;font-size:12px}
+  .hint{color:var(--warn);font-size:12px;margin-top:6px}
+  .tpl{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:8px}
+  .tpl div{border:1px solid var(--line);border-radius:8px;padding:10px;background:#1b1c1f}
+  .tpl div b{display:block;margin-bottom:2px}
+  .tpl div small{color:var(--mut)}
+  .note{max-width:1000px;margin:0 auto;color:var(--mut);border-left:3px solid var(--warn);padding-left:12px}
+  @media (max-width:700px){.body{flex-direction:column}.side{width:auto;border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<div class="opt" style="margin-bottom:24px">
+  <h1>Tela de configuração do add-on: dois caminhos</h1>
+  <p class="sub">Rascunho para reagir, não é design final. Cada "gerador" é uma receita de cards: tema, como o texto deve ser, formato, áudio e regras. Os exemplos usam os seus casos (inglês e entrevista).</p>
+</div>
+
+<!-- OPÇÃO A -->
+<div class="opt">
+  <h2><span>A</span>Uma tela só, tudo à vista</h2>
+  <p class="d">Lista de geradores à esquerda. Ao clicar, aparece um formulário único com a descrição em texto livre (o prompt) e as opções logo abaixo.</p>
+  <div class="win">
+    <div class="bar">Ferramentas › Cards automáticos</div>
+    <div class="body">
+      <div class="side">
+        <div class="it on">Inglês do dia a dia<small>English · 10/dia · áudio</small></div>
+        <div class="it">Entrevista técnica<small>Entrevista · 3/dia</small></div>
+        <div class="it">Vocabulário de MLOps<small>English::ML · 4/dia · áudio</small></div>
+        <div class="add">+ Novo gerador</div>
+      </div>
+      <div class="main">
+        <div class="row">
+          <div><label>Nome</label><div class="in">Inglês do dia a dia</div></div>
+          <div><label>Baralho de destino</label><div class="sel">English::Daily ▾</div></div>
+        </div>
+        <label>Como os cards devem ser (descrição para a IA)</label>
+        <div class="ta">Frases curtas em inglês que eu usaria no trabalho remoto com um time de fora: reuniões, code review, pedir ajuda. Na frente a frase em português, no verso em inglês. Nível intermediário, no máximo 15 palavras. Evite gírias muito regionais.</div>
+        <div class="row">
+          <div><label>Formato do card</label><div class="sel">Frente e verso ▾</div></div>
+          <div><label>Cards por dia</label><div class="in">10</div></div>
+          <div><label>Modelo de IA</label><div class="sel">gpt-4o-mini ▾</div></div>
+        </div>
+        <div class="chk"><span class="box on">✓</span> Gerar áudio do texto em inglês <span style="color:var(--mut)">(voz: en-US-Aria ▾)</span></div>
+        <div class="chk"><span class="box on">✓</span> Não repetir o que já existe no baralho</div>
+        <div class="chk"><span class="box">&nbsp;</span> Aumentar a quantidade com o tempo (progressão)</div>
+        <div class="btns">
+          <span class="b t">Testar: gerar 1 card de exemplo</span>
+          <span class="b">Cancelar</span><span class="b p">Salvar</span>
+        </div>
+        <div class="card">
+          <div>Você pode revisar meu pull request quando tiver um tempo?</div><hr>
+          <div>Could you review my pull request when you have a moment?</div>
+          <div class="au">▶ áudio</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OPÇÃO B -->
+<div class="opt">
+  <h2><span>B</span>Começa de um modelo pronto, opções avançadas em abas</h2>
+  <p class="d">Quem é novo escolhe um modelo (idioma, entrevista, conceitos) e só ajusta o tema. Quem quer mexer em tudo abre as abas Prompt e Regras.</p>
+  <div class="win">
+    <div class="bar">Ferramentas › Cards automáticos › Novo gerador</div>
+    <div class="body">
+      <div class="side">
+        <div class="it">Inglês do dia a dia<small>English · 10/dia · áudio</small></div>
+        <div class="it on">Novo gerador<small>rascunho</small></div>
+        <div class="add">+ Novo gerador</div>
+      </div>
+      <div class="main">
+        <div class="tabs"><div class="tab on">Básico</div><div class="tab">Prompt</div><div class="tab">Formato e áudio</div><div class="tab">Regras</div></div>
+        <label>1. Escolha um modelo para começar</label>
+        <div class="tpl">
+          <div style="border-color:var(--acc)"><b>Idioma</b><small>frase na língua nativa ↔ língua estudada, com áudio</small></div>
+          <div><b>Entrevista técnica</b><small>pergunta ↔ resposta curta e direta</small></div>
+          <div><b>Conceitos</b><small>termo ↔ explicação, com exemplo</small></div>
+          <div><b>Em branco</b><small>escrevo tudo do zero</small></div>
+        </div>
+        <label>2. Sobre o que você quer estudar?</label>
+        <div class="in">Inglês para reuniões e code review em time remoto</div>
+        <div class="row">
+          <div><label>Nível</label><div class="sel">Intermediário ▾</div></div>
+          <div><label>Cards por dia</label><div class="in">10</div></div>
+          <div><label>Baralho</label><div class="sel">English::Daily ▾</div></div>
+        </div>
+        <p class="hint">O add-on monta o prompt sozinho a partir disto. Na aba "Prompt" dá para ver e editar o texto completo.</p>
+        <div class="btns">
+          <span class="b t">Testar: gerar 1 card de exemplo</span>
+          <span class="b">Cancelar</span><span class="b p">Salvar</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="note">A diferença é para quem a tela é feita: <b>A</b> supõe que a pessoa sabe escrever um bom prompt; <b>B</b> ajuda quem não sabe, sem esconder o prompt de quem sabe. Me diga no terminal qual chega mais perto, ou o que juntaria das duas.</p>
+</body>
+</html>
