@@ -2,7 +2,7 @@
 
 - **Data:** 10/11/2026
 - **Status:** rascunho para aprovação (já com as respostas da revisão de 10/11)
-- **Nome:** "AutoCards" é provisório. O nome final precisa ser checado no AnkiWeb antes da publicação.
+- **Nome:** "AutoCards", definido pelo dono em 14/11/2026.
 - **Rascunhos de tela:** [`docs/mockups/`](../../mockups/) (`config-v1.html`, `prompt-v1.html`, `regras-v1.html`). A tela escolhida foi a **B** de `config-v1.html`.
 
 Legenda das decisões, usada em todo o documento:
@@ -319,4 +319,4 @@ Enquanto durar o paralelo, o add-on não mexe nos timers, nos scripts nem nos ba
 
 ## 15. Pendências
 
-- Nome definitivo do add-on, checando se já existe algo parecido no AnkiWeb.
+- ~~Nome definitivo do add-on~~: "AutoCards" (14/11/2026).

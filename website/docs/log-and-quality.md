@@ -21,7 +21,7 @@ AutoCards keeps a log of every run and every card, so you can measure what the A
 
 ## Export
 
-**Tools › AutoCards › Export log (CSV)…** saves everything as a spreadsheet. API keys are never written to the log.
+**Tools › AutoCards › Export log (CSV)…** saves everything as a spreadsheet: one row per card, with the generator name. Each run's cost appears only on its first row, so adding up the `run_cost_usd` column gives your real spend. Test runs are left out. API keys are never written to the log.
 
 ## Ideas for analysis
 

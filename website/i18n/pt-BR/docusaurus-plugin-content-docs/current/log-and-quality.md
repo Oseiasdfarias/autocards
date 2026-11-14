@@ -21,7 +21,7 @@ O AutoCards registra toda execução e todo card, para você medir o que a IA pr
 
 ## Exportar
 
-**Ferramentas › AutoCards › Exportar registro (CSV)…** salva tudo como planilha. Chaves de API nunca são gravadas no registro.
+**Ferramentas › AutoCards › Exportar registro (CSV)…** salva tudo como planilha: uma linha por card, com o nome do gerador. O custo de cada geração aparece só na primeira linha dela, então somar a coluna `run_cost_usd` dá o seu gasto real. Os testes ficam de fora. Chaves de API nunca são gravadas no registro.
 
 ## Ideias de análise
 

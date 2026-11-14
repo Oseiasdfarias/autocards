@@ -1,4 +1,4 @@
-# AutoCards (nome provisório)
+# AutoCards
 
 Add-on do Anki que cria cards novos todo dia, sozinho, com IA. Cada pessoa configura geradores (tema, prompt por campos, formato, áudio e regras), e o add-on gera a cota do dia ao abrir o Anki.
 

@@ -106,7 +106,11 @@ def _post_run(cmd: str, ok: bool, msg: str) -> None:
 
 
 def run_due(force: bool = False, only: str | None = None, quiet_if_nothing: bool = True) -> None:
-    if _state["running"] or mw.col is None:
+    if mw.col is None:
+        return
+    if _state["running"]:
+        if not quiet_if_nothing:  # clique em "Gerar agora" durante uma geração
+            tooltip(tr("summary.already_running"))
         return
     try:
         cfg = config_store.load(CONFIG_PATH)

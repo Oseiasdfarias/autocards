@@ -20,6 +20,10 @@ title: Changelog
 - Closing the profile mid-run no longer spends API calls or marks the day as done.
 - Without internet, the notice says so and the run retries after 2 minutes.
 - The review window closes when the queue is empty.
+- Structured output in strict mode, so the AI never leaves out a required field.
+- The exported log (CSV) shows the generator name, puts each run's cost on one line only (so the column adds up to the real spend) and leaves test runs out.
+- The review queue shows plain text while you edit.
+- Clicking **Generate now** during a run shows a notice instead of doing nothing.
 
 ## 1.0.0
 

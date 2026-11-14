@@ -246,6 +246,27 @@ class ReviewDialogSmoke(unittest.TestCase):
         self.assertEqual(rows, {a: "edited", b: "discarded"})
         self.assertFalse(d.isVisible())  # fila vazia: a tela fecha sozinha
 
+    def test_editor_shows_plain_text_and_saves_html(self):
+        from anki.collection import Collection
+        from addon.ankiops import collection as ops
+        from addon.gui import paths
+        from addon.gui.review_dialog import ReviewDialog
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        col = Collection(os.path.join(tmp.name, "c.anki2"))
+        self.addCleanup(col.close)
+        orig = paths.LOG_PATH
+        paths.LOG_PATH = os.path.join(tmp.name, "log.sqlite3")
+        self.addCleanup(setattr, paths, "LOG_PATH", orig)
+        nid = ops.add_card(col, "Q", "basic", {"front": "a <b> & c", "back": "x"}, None, "front", [], pending=True)
+        d = ReviewDialog(None, col=col)
+        self.assertEqual(d.editors["Front"].toPlainText(), "a <b> & c")
+        d.editors["Back"].setPlainText("linha 1\nlinha 2")
+        d.accept_current()
+        note = col.get_note(nid)
+        self.assertEqual(note["Front"], "a &lt;b&gt; &amp; c")  # não editado: intacto
+        self.assertEqual(note["Back"], "linha 1<br>linha 2")
+
     def test_dialog_has_close_button_and_closes_when_queue_ends(self):
         from anki.collection import Collection
         from addon.ankiops import collection as ops

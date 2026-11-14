@@ -95,17 +95,30 @@ class Store:
                 (prefix,)).fetchone()
         return float(row[0])
 
-    def export_csv(self, path: str) -> None:
-        q = """SELECT r.id AS run_id, r.started, r.generator_id, r.is_test, r.status, r.service, r.model,
-                      r.tokens_in, r.tokens_out, r.cost, r.duration_s, r.requested, r.received,
-                      r.dropped_invalid, r.dropped_dupe, r.inserted, r.blocked_reason, r.error,
-                      c.content, c.note_id, c.has_audio, c.outcome, c.error AS card_error, r.prompt
-               FROM runs r LEFT JOIN cards c ON c.run_id = r.id ORDER BY r.id, c.id"""
+    def export_csv(self, path: str, generator_names: dict[str, str] | None = None,
+                   include_tests: bool = False) -> None:
+        """Uma linha por card (ou por execução sem cards). O custo da execução aparece só na primeira
+        linha dela, então somar a coluna run_cost_usd dá o gasto real. Testes ficam de fora por padrão."""
+        names = generator_names or {}
+        filtro = "" if include_tests else "WHERE r.is_test = 0"
+        q = f"""SELECT r.id, r.started, r.generator_id, r.is_test, r.status, r.cost, r.inserted,
+                       r.dropped_dupe, r.dropped_invalid, r.service, r.model, r.tokens_in, r.tokens_out,
+                       r.blocked_reason, r.error, c.content, c.note_id, c.has_audio, c.outcome, c.error
+                FROM runs r LEFT JOIN cards c ON c.run_id = r.id {filtro} ORDER BY r.id, c.id"""
         with self._lock:
-            cur = self._db.execute(q)
-            names = [d[0] for d in cur.description]
-            rows = cur.fetchall()
+            rows = self._db.execute(q).fetchall()
+        cab = ["date", "generator", "status", "run_cost_usd", "cards_inserted", "dropped_duplicates",
+               "dropped_invalid", "card", "note_id", "has_audio", "outcome", "card_error", "service", "model",
+               "tokens_in", "tokens_out", "blocked_reason", "error", "is_test", "run_id"]
+        visto: set[int] = set()
         with open(path, "w", newline="", encoding="utf-8") as f:
             w = csv.writer(f)
-            w.writerow(names)
-            w.writerows(rows)
+            w.writerow(cab)
+            for (rid, started, gid, is_test, status, cost, inserted, ddup, dinv, service, model, tin, tout,
+                 blocked, error, content, nid, audio, outcome, cerr) in rows:
+                primeira = rid not in visto
+                visto.add(rid)
+                w.writerow([started, names.get(gid, gid), status, f"{cost or 0:.6f}" if primeira else "",
+                            inserted if primeira else "", ddup if primeira else "", dinv if primeira else "",
+                            content, nid, audio, outcome, cerr, service, model,
+                            tin if primeira else "", tout if primeira else "", blocked, error, is_test, rid])

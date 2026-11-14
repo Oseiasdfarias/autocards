@@ -10,7 +10,7 @@ from aqt.utils import showWarning, tooltip
 
 from ..core.i18n import tr
 from ..core.store import Store
-from .paths import LOG_PATH
+from .paths import CONFIG_PATH, LOG_PATH
 
 
 def setup() -> None:
@@ -90,9 +90,14 @@ def export_log() -> None:
     path, _ = QFileDialog.getSaveFileName(mw, tr("menu.export_log"), default, "CSV (*.csv)")
     if not path:
         return
+    from ..core import config_store
+    try:
+        names = {g.id: g.name for g in config_store.load(CONFIG_PATH).generators}
+    except Exception:
+        names = {}
     store = Store(LOG_PATH)
     try:
-        store.export_csv(path)
+        store.export_csv(path, generator_names=names)
     finally:
         store.close()
     tooltip(tr("log.exported", path=path))

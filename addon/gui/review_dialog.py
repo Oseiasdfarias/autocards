@@ -1,20 +1,28 @@
 """Tela "Revisar cards gerados" (spec §7.5): aceitar (com ou sem edição) ou descartar cada card da fila."""
 from __future__ import annotations
 
+import html
 import json
 import os
+import re
 
 from aqt import mw
 from aqt.qt import (QDialog, QFormLayout, QHBoxLayout, QLabel, QPlainTextEdit, QPushButton, QVBoxLayout,
                     QWidget)
 from aqt.utils import tooltip
 
-from ..ankiops.collection import accept_note, discard_note, pending_notes
+from ..ankiops.collection import accept_note, discard_note, pending_notes, to_html
 from ..core.i18n import tr
 from ..core.store import Store
 from . import paths
 
 AUDIO_FIELDS = ("FrontAudio", "BackAudio")
+_BR = re.compile(r"<br\s*/?>", re.I)
+
+
+def html_para_texto(valor: str) -> str:
+    """O que o aluno lê no editor: sem entidades nem <br>."""
+    return html.unescape(_BR.sub("\n", valor or ""))
 
 
 class ReviewDialog(QDialog):
@@ -74,7 +82,7 @@ class ReviewDialog(QDialog):
         for name, value in note.items():
             if name in AUDIO_FIELDS:
                 continue
-            ed = QPlainTextEdit(value)
+            ed = QPlainTextEdit(html_para_texto(value))
             ed.setMaximumHeight(90)
             self.editors[name] = ed
             self.form.addRow(name, ed)
@@ -99,7 +107,8 @@ class ReviewDialog(QDialog):
         if self.nid is None:
             return
         note = self.col.get_note(self.nid)
-        changed = {k: ed.toPlainText() for k, ed in self.editors.items() if ed.toPlainText() != note[k]}
+        changed = {k: to_html(ed.toPlainText()) for k, ed in self.editors.items()
+                   if ed.toPlainText() != html_para_texto(note[k])}
         original, final = accept_note(self.col, self.nid, changed or None)
         if changed:
             self._log("edited", original, final)

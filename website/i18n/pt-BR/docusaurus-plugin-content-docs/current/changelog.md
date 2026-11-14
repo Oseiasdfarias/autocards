@@ -20,6 +20,10 @@ title: Novidades
 - Fechar o perfil no meio da geração não gasta mais chamadas à API nem marca o dia como feito.
 - Sem internet, o aviso diz isso, e a geração tenta de novo em 2 minutos.
 - A tela de revisão fecha quando a fila esvazia.
+- Saída estruturada em modo estrito, para a IA nunca deixar de fora um campo obrigatório.
+- O registro exportado (CSV) mostra o nome do gerador, põe o custo de cada geração numa linha só (a coluna soma o gasto real) e deixa os testes de fora.
+- A fila de revisão mostra o texto limpo enquanto você edita.
+- Clicar em **Gerar agora** durante uma geração mostra um aviso, em vez de não fazer nada.
 
 ## 1.0.0
 
