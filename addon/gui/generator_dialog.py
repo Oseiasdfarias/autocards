@@ -96,6 +96,12 @@ class GeneratorsDialog(QDialog):
         root.addLayout(top)
         root.addLayout(bottom)
 
+        from .setup_wizard import SetupWizard, needs_setup
+        if needs_setup(self.cfg) and mw is not None:  # primeira vez: configuração guiada
+            if SetupWizard(self, self.cfg).exec():
+                disk = config_store.load(CONFIG_PATH)
+                disk.services = self.cfg.services
+                config_store.save(CONFIG_PATH, disk)
         self._fill_service_combos()
         self._refresh_list()
         self.tabs.setEnabled(bool(self.cfg.generators))

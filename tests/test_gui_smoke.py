@@ -172,6 +172,27 @@ if __name__ == "__main__":
     unittest.main()
 
 
+class SetupWizardSmoke(unittest.TestCase):
+    def test_apply_creates_text_and_single_edge(self):
+        from addon.gui.setup_wizard import apply_setup, needs_setup
+        cfg = AppConfig()
+        self.assertTrue(needs_setup(cfg))
+        apply_setup(cfg, "OpenAI", "sk-abc")
+        self.assertFalse(needs_setup(cfg))
+        text = [s for s in cfg.services if s.kind == "text"]
+        tts = [s for s in cfg.services if s.kind == "tts"]
+        self.assertEqual((len(text), text[0].base_url, text[0].api_key), (1, "https://api.openai.com/v1", "sk-abc"))
+        self.assertEqual([s.provider for s in tts], ["edge"])
+        apply_setup(cfg, "Ollama (local)", "")
+        self.assertEqual(len([s for s in cfg.services if s.kind == "tts"]), 1)
+        self.assertEqual(len([s for s in cfg.services if s.kind == "text"]), 2)
+
+    def test_wizard_builds(self):
+        from addon.gui.setup_wizard import SetupWizard
+        w = SetupWizard(None, AppConfig())
+        self.assertGreaterEqual(len(w.pageIds()), 3)
+
+
 class ReviewDialogSmoke(unittest.TestCase):
     def test_accept_edit_and_discard(self):
         from anki.collection import Collection

@@ -24,6 +24,7 @@ def setup() -> None:
 
     add(tr("menu.generators"), open_generators)
     add(tr("menu.services"), open_services)
+    add(tr("menu.setup"), open_setup)
     add(tr("menu.review"), open_review)
     add(tr("menu.generate_now"), generate_now)
     add(tr("menu.export_log"), export_log)
@@ -47,6 +48,27 @@ def open_generators() -> None:
 def open_services() -> None:
     from .services_dialog import ServicesDialog
     _open(lambda: ServicesDialog(mw))
+
+
+def open_setup() -> None:
+    from ..core import config_store
+    from .paths import CONFIG_PATH
+    from .setup_wizard import SetupWizard
+
+    def make():
+        cfg = config_store.load(CONFIG_PATH)
+        w = SetupWizard(mw, cfg)
+        w.accepted.connect(lambda: _save_services(cfg))
+        return w
+    _open(make)
+
+
+def _save_services(cfg) -> None:
+    from ..core import config_store
+    from .paths import CONFIG_PATH
+    disk = config_store.load(CONFIG_PATH)
+    disk.services = cfg.services
+    config_store.save(CONFIG_PATH, disk)
 
 
 def open_review() -> None:
