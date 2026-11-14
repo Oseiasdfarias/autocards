@@ -33,6 +33,15 @@ class Rules:
     no_repeat: bool = True
     spend_cap_enabled: bool = True
     spend_cap_usd: float = 2.0
+    # 1.1
+    approval_enabled: bool = False
+    reinforce_enabled: bool = False
+    reinforce_min_lapses: int = 3
+    reinforce_per_day: int = 2
+    topics_enabled: bool = False
+    topics: list[str] = field(default_factory=list)
+    topics_per_day: int = 1
+    topics_next: int = 0
     extra: dict[str, Any] = field(default_factory=dict)
 
 

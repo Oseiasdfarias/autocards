@@ -95,3 +95,19 @@ class RunStateMergeTest(unittest.TestCase):
             config_store.save(path, AppConfig())
             config_store.update_run_state(path, sample_config().generators)
             self.assertEqual(config_store.load(path).generators, [])
+
+
+class V11RulesTest(unittest.TestCase):
+    def test_v10_config_gets_v11_defaults(self):
+        cfg = app_config_from_dict({"generators": [{"id": "g", "name": "n", "rules": {"brake_limit": 5}}]})
+        r = cfg.generators[0].rules
+        self.assertEqual((r.brake_limit, r.approval_enabled, r.reinforce_enabled, r.topics_enabled), (5, False, False, False))
+        self.assertEqual((r.reinforce_min_lapses, r.reinforce_per_day, r.topics_per_day, r.topics_next), (3, 2, 1, 0))
+        self.assertEqual(r.topics, [])
+
+    def test_topics_roundtrip(self):
+        cfg = sample_config()
+        cfg.generators[0].rules.topics = ["a", "b"]
+        cfg.generators[0].rules.topics_next = 1
+        back = app_config_from_dict(to_dict(cfg))
+        self.assertEqual((back.generators[0].rules.topics, back.generators[0].rules.topics_next), (["a", "b"], 1))
