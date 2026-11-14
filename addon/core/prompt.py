@@ -30,8 +30,18 @@ def response_schema(card_format: str, context_field: bool) -> dict:
     }
 
 
+def render_field(gen: Generator, text: str) -> str:
+    """Troca só os marcadores conhecidos; chaves soltas no texto do usuário ficam intactas."""
+    values = {"topic": gen.topic, "level": gen.level,
+              "target_lang": gen.target_lang, "native_lang": gen.native_lang}
+    for k, v in values.items():
+        text = text.replace("{" + k + "}", v or "")
+    return text
+
+
 def user_part(gen: Generator) -> str:
-    parts = [f"## {f.title}\n{f.text.strip()}" for f in gen.prompt_fields if f.enabled and f.text.strip()]
+    parts = [f"## {f.title}\n{render_field(gen, f.text.strip())}"
+             for f in gen.prompt_fields if f.enabled and f.text.strip()]
     return "\n\n".join(parts)
 
 

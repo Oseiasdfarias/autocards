@@ -63,6 +63,11 @@ class PromptTest(unittest.TestCase):
         block = prompt.fixed_block(gen(), 1, [], [])
         self.assertIn(json.dumps(prompt.response_schema("basic", False)), block)
 
+    def test_placeholders_rendered(self):
+        g = gen(topic="ML ops", level="advanced", target_lang="English", native_lang="Portuguese",
+                prompt_fields=[PromptField("r", "Role", "Teach {target_lang} to {native_lang}: {topic} ({level}) {x}")])
+        self.assertIn("Teach English to Portuguese: ML ops (advanced) {x}", prompt.user_part(g))
+
     def test_build_messages_roles(self):
         msgs = prompt.build_messages(gen(), 4, [], [])
         self.assertEqual([m["role"] for m in msgs], ["system", "user"])
