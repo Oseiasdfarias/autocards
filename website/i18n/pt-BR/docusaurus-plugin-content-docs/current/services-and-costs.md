@@ -35,6 +35,11 @@ O AutoCards pede a resposta em JSON estruturado. Se o serviço não suportar, el
 
 Se o áudio de um card falhar, o card entra mesmo assim, sem áudio, e o erro vai para o registro.
 
+![Um serviço de áudio: preço por mil caracteres](/img/screens/pt-BR/services-audio.png)
+
+*Um serviço de áudio: preço por mil caracteres*
+
+
 ## Testar conexão
 
 Todo serviço tem o botão **Testar conexão**. O de texto é conferido listando os modelos; o de áudio, falando "Hello".

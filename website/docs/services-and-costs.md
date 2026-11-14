@@ -35,6 +35,11 @@ AutoCards asks for structured JSON output. If the service doesn't support it, Au
 
 If the audio of a card fails, the card is still added, without audio, and the error goes to the log.
 
+![An audio service: price per thousand characters](/img/screens/en/services-audio.png)
+
+*An audio service: price per thousand characters*
+
+
 ## Test connection
 
 Every service has a **Test connection** button. Text services are checked by listing models; audio services by speaking "Hello".
