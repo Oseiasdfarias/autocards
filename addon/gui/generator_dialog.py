@@ -26,6 +26,10 @@ SIDES = ["front", "back"]
 TEMPLATE_KEYS = ["language", "interview", "concepts", "blank"]
 
 
+def _tab(label: str) -> str:
+    return label.replace("&", "&&")  # no Qt, "&" sozinho marca atalho de teclado
+
+
 def voices_for(provider: str) -> list[str]:
     if provider == "edge":
         return [v for vs in EDGE_VOICES.values() for v in vs]
@@ -69,10 +73,10 @@ class GeneratorsDialog(QDialog):
             left.addWidget(b)
 
         self.tabs = QTabWidget()
-        self.tabs.addTab(self._basic_tab(), tr("gen.tab.basic"))
-        self.tabs.addTab(self._prompt_tab(), tr("gen.tab.prompt"))
-        self.tabs.addTab(self._format_tab(), tr("gen.tab.format"))
-        self.tabs.addTab(self._rules_tab(), tr("gen.tab.rules"))
+        self.tabs.addTab(self._basic_tab(), _tab(tr("gen.tab.basic")))
+        self.tabs.addTab(self._prompt_tab(), _tab(tr("gen.tab.prompt")))
+        self.tabs.addTab(self._format_tab(), _tab(tr("gen.tab.format")))
+        self.tabs.addTab(self._rules_tab(), _tab(tr("gen.tab.rules")))
 
         top = QHBoxLayout()
         top.addLayout(left, 1)

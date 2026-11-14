@@ -70,3 +70,29 @@ class NetworkFailureTest(unittest.TestCase):
         from addon.gui.scheduler import should_retry_soon
         self.assertTrue(should_retry_soon([self.net]))
         self.assertFalse(should_retry_soon([self.other]))
+
+
+class ScreenTextTest(unittest.TestCase):
+    def tearDown(self):
+        i18n.set_lang("en")
+
+    def test_prompt_field_titles_follow_language(self):
+        from datetime import date
+        from addon.core import templates
+        i18n.set_lang("pt_BR")
+        g = templates.new_generator("blank", "N", "D", "s", date(2026, 11, 14))
+        self.assertEqual(g.prompt_fields[0].title, "Papel da IA")
+        i18n.set_lang("en")
+        g = templates.new_generator("blank", "N", "D", "s", date(2026, 11, 14))
+        self.assertEqual(g.prompt_fields[0].title, "AI role")
+
+    def test_import_summary_is_translated(self):
+        from addon.gui.import_dialog import describe
+        i18n.set_lang("pt_BR")
+        text = describe({"name": "X", "template": "interview", "format": "reversed", "fields": 7, "audio": False,
+                         "cards_per_day": 5, "spend_cap_usd": 2.0, "rules": ["ramp", "approval", "topics"]})
+        self.assertIn("Frente e verso, com cartão invertido", text)
+        self.assertIn("Aumentar aos poucos", text)
+        self.assertIn("Aprovar antes de entrar", text)
+        self.assertNotIn("approval", text)
+        self.assertNotIn("(cards esperam", text)

@@ -4,6 +4,13 @@ from __future__ import annotations
 STRINGS: dict[str, dict[str, str]] = {
     "en": {
         "menu.title": "AutoCards",
+        "field.role": "AI role",
+        "field.topic": "Topic",
+        "field.level": "Level and audience",
+        "field.front": "Card front",
+        "field.back": "Card back",
+        "field.avoid": "What to avoid",
+        "field.examples": "Examples of good cards",
         "menu.generators": "Generators…",
         "menu.services": "Services…",
         "menu.generate_now": "Generate now",
@@ -137,6 +144,13 @@ STRINGS: dict[str, dict[str, str]] = {
     },
     "pt": {
         "menu.generators": "Geradores…",
+        "field.role": "Papel da IA",
+        "field.topic": "Tema",
+        "field.level": "Nível e público",
+        "field.front": "Frente do card",
+        "field.back": "Verso do card",
+        "field.avoid": "O que evitar",
+        "field.examples": "Exemplos de cards bons",
         "menu.services": "Serviços…",
         "menu.generate_now": "Gerar agora",
         "menu.review": "Revisar cards gerados…",

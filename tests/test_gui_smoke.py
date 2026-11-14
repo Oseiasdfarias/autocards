@@ -74,6 +74,10 @@ class GeneratorsDialogSmoke(GuiSmokeBase):
         self.assertNotIn(6, g.rules.weekdays)
         self.assertTrue(g.audio_enabled)
 
+    def test_tab_labels_escape_ampersand(self):
+        d = self.make()
+        self.assertEqual(d.tabs.tabText(2), "Format && audio")
+
     def test_v11_rules_saved(self):
         d = self.make()
         d.new_from_template("interview")

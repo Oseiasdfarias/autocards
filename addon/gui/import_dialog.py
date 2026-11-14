@@ -11,6 +11,22 @@ from ..core.i18n import tr
 from ..core.model import AppConfig, Generator
 
 
+RULE_LABELS = {"ramp": "rule.ramp", "weekdays": "rule.weekdays", "brake": "rule.brake",
+               "spend_cap": "rule.spend_cap", "approval": "rule.approval", "reinforce": "rule.reinforce",
+               "topics": "rule.topics"}
+
+
+def describe(info: dict) -> str:
+    """Resumo do arquivo em texto da interface, sem nomes internos."""
+    cap = info["spend_cap_usd"]
+    rules = [tr(RULE_LABELS[r]).split(" (")[0] for r in info["rules"] if r in RULE_LABELS]
+    return tr("import.summary", name=info["name"], fields=info["fields"],
+              format=tr(f"gen.format.{info['format']}"),
+              audio=tr("common.yes") if info["audio"] else tr("common.no"),
+              rules=", ".join(rules) or "—", per_day=info["cards_per_day"],
+              cap=f"US$ {cap:.2f}" if cap is not None else tr("import.no_cap"))
+
+
 class ImportDialog(QDialog):
     def __init__(self, parent, cfg: AppConfig, data: dict):
         super().__init__(parent)
@@ -18,11 +34,9 @@ class ImportDialog(QDialog):
         info = exchange.summary(data)  # levanta ExchangeError se o arquivo não serve
         self.setWindowTitle(tr("import.title"))
         form = QFormLayout(self)
-        cap = info["spend_cap_usd"]
-        form.addRow(QLabel(tr("import.summary", name=info["name"], fields=info["fields"],
-                              format=info["format"], audio=tr("common.yes") if info["audio"] else tr("common.no"),
-                              rules=", ".join(info["rules"]) or "—", per_day=info["cards_per_day"],
-                              cap=f"US$ {cap:.2f}" if cap is not None else tr("import.no_cap"))))
+        summary = QLabel(describe(info))
+        summary.setWordWrap(True)
+        form.addRow(summary)
         self.deck = QComboBox()
         self.deck.setEditable(True)
         if mw is not None and mw.col is not None:

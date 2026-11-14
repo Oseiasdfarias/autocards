@@ -5,6 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import date
 
+from .i18n import tr
 from .model import Generator, PromptField, Rules
 
 FIELD_TITLES = [
@@ -61,7 +62,7 @@ TEMPLATES: dict[str, dict] = {
 
 def new_generator(template: str, name: str, deck: str, text_service_id: str, today: date) -> Generator:
     t = TEMPLATES[template]
-    fields = [PromptField(k, title, t["texts"].get(k, "")) for k, title in FIELD_TITLES]
+    fields = [PromptField(k, tr(f"field.{k}"), t["texts"].get(k, "")) for k, _title in FIELD_TITLES]
     return Generator(
         id=uuid.uuid4().hex[:12], name=name, template=template, deck=deck,
         text_service_id=text_service_id, prompt_fields=fields,
