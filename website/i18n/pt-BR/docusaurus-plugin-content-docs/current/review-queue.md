@@ -23,7 +23,7 @@ Abra **Ferramentas › AutoCards › Revisar cards gerados…**. A tela mostra u
 | **Tocar áudio** | Toca o áudio do card, se houver. |
 | **Fechar** | Deixa o resto para depois. |
 
-Quando a fila esvazia, a tela fecha e mostra um aviso. Se você dessuspender um card pendente à mão, ele continua na fila até você aceitar ou descartar. Notas pendentes apagadas no Navegador simplesmente saem da fila.
+Quando a fila esvazia, a tela fecha e mostra um aviso. Se você dessuspender um card pendente à mão, ele continua na fila até você aceitar ou descartar. Notas pendentes apagadas no Painel do Anki simplesmente saem da fila.
 
 :::tip
 Aceitos, editados e descartados são o melhor sinal de qualidade que você tem. Exporte o registro para ver como cada gerador está indo ([Registro e qualidade](log-and-quality.md)).

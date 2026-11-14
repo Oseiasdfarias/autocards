@@ -6,7 +6,7 @@ title: Instalação
 # Instalação
 
 1. Baixe o `autocards.ankiaddon` na [página de Releases do GitHub](https://github.com/Oseiasdfarias/autocards/releases), ou [gere a partir do código](development.md#gerar-o-pacote).
-2. No Anki, abra **Ferramentas › Complementos › Instalar a partir de arquivo…** e escolha o arquivo.
+2. No Anki, abra **Ferramentas › Extensões › Instalar de um arquivo...** e escolha o arquivo.
 3. Reinicie o Anki.
 
 Aparece um menu novo: **Ferramentas › AutoCards**.
@@ -31,4 +31,4 @@ Instale o arquivo novo do mesmo jeito. Seus geradores, serviços e registro fica
 
 ## Desinstalar
 
-**Ferramentas › Complementos**, selecione o AutoCards, **Excluir**. Os cards já criados continuam na sua coleção.
+**Ferramentas › Extensões**, selecione o AutoCards e clique em **Excluir**. Os cards já criados continuam na sua coleção.
