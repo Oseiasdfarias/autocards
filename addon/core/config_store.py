@@ -19,11 +19,16 @@ def load(path: str) -> AppConfig:
     except FileNotFoundError:
         return AppConfig()
     except (ValueError, OSError) as e:
-        raise ConfigError(f"{path}: {e}") from e
+        raise ConfigError(f"{_short(path)}: {e}") from e
     try:
         return app_config_from_dict(data)
     except Exception as e:
-        raise ConfigError(f"{path}: {type(e).__name__}: {e}") from e
+        raise ConfigError(f"{_short(path)}: {type(e).__name__}: {e}") from e
+
+
+def _short(path: str) -> str:
+    """'user_files/autocards.json' em vez do caminho inteiro (mensagem curta, sem detalhes da máquina)."""
+    return os.path.join(os.path.basename(os.path.dirname(path)), os.path.basename(path))
 
 
 def save(path: str, cfg: AppConfig) -> None:

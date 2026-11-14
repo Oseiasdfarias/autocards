@@ -32,6 +32,8 @@ class RunResult:
     status: str  # ok | blocked | error | skipped | aborted
     inserted: int
     message: str
+    reason: str = ""  # bloqueio: weekday | brake | spend_cap
+    params: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -102,7 +104,7 @@ def prepare(col, cfg: AppConfig, gen: Generator, store: Store, today: date, forc
         if block:
             store.finish_run(run_id, blocked_reason=f"{block.reason}: {block.detail}", status="blocked")
             gen.last_success = today.isoformat()  # o dia foi tratado; não repete a cada hora
-            return RunResult(gen.name, "blocked", 0, block.detail)
+            return RunResult(gen.name, "blocked", 0, block.detail, reason=block.reason, params=block.params)
     count = 1 if is_test else rules.daily_quota(gen.rules, gen.cards_per_day,
                                                 date.fromisoformat(gen.created or today.isoformat()), today)
     existing_all = existing_fronts(col, gen.deck) if gen.rules.no_repeat else []

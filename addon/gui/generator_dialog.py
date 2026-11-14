@@ -26,6 +26,17 @@ SIDES = ["front", "back"]
 TEMPLATE_KEYS = ["language", "interview", "concepts", "blank"]
 
 
+CARD_LABELS = {"front": "card.front", "back": "card.back", "context": "card.context",
+               "text": "card.text", "back_extra": "card.back_extra"}
+
+
+def sample_text(card: dict) -> str:
+    """Texto do resultado do 'Testar', com os nomes dos campos na língua da interface."""
+    lines = [f"{tr(CARD_LABELS[k]) if k in CARD_LABELS else k}: {v}" for k, v in card.items()
+             if k != "reinforcement"]
+    return tr("gen.test_result") + "\n\n" + "\n\n".join(lines)
+
+
 def _tab(label: str) -> str:
     return label.replace("&", "&&")  # no Qt, "&" sozinho marca atalho de teclado
 
@@ -522,7 +533,7 @@ class GeneratorsDialog(QDialog):
                 return
             payload = json.loads(result.message)
             card = payload.get("card") or {}
-            text = "\n\n".join(f"{k}: {v}" for k, v in card.items())
+            text = sample_text(card) if card else "—"
             if payload.get("audio_error"):
                 text += f"\n\n⚠ {payload['audio_error']}"
             if payload.get("audio_path"):

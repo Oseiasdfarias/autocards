@@ -96,3 +96,38 @@ class ScreenTextTest(unittest.TestCase):
         self.assertIn("Aprovar antes de entrar", text)
         self.assertNotIn("approval", text)
         self.assertNotIn("(cards esperam", text)
+
+
+class NoticeTextTest(unittest.TestCase):
+    def tearDown(self):
+        i18n.set_lang("en")
+
+    def test_blocked_reason_translated(self):
+        from datetime import date
+        from addon.core import rules
+        from addon.core.model import Generator, Rules
+        from addon.ankiops.runner import RunResult
+        from addon.gui.scheduler import summarize
+        g = Generator(id="g", name="Bio", rules=Rules(brake_limit=30))
+        block = rules.check_blocks(g, date(2026, 11, 14), 35, 0.0)
+        i18n.set_lang("pt_BR")
+        r = RunResult("Bio", "blocked", 0, block.detail, reason=block.reason, params=block.params)
+        text, _ = summarize([r])
+        self.assertIn("Bio: hoje não (35 cards vencidos, limite 30)", text)
+
+    def test_sample_card_text_uses_field_labels(self):
+        from addon.gui.generator_dialog import sample_text
+        i18n.set_lang("pt_BR")
+        text = sample_text({"front": "Hi", "back": "Oi", "context": "greeting"})
+        self.assertTrue(text.startswith("Card de exemplo (não entrou no Anki)"))
+        self.assertIn("Frente: Hi", text)
+        self.assertIn("Verso: Oi", text)
+        self.assertIn("Contexto: greeting", text)
+        self.assertNotIn("front:", text)
+
+    def test_exchange_errors_translated(self):
+        from addon.core import exchange
+        i18n.set_lang("pt_BR")
+        with self.assertRaises(exchange.ExchangeError) as cm:
+            exchange.summary({"hello": 1})
+        self.assertIn("não é um arquivo de gerador do AutoCards", str(cm.exception))

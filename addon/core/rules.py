@@ -1,7 +1,7 @@
 """Regras do gerador (spec §7.4): cota do dia, bloqueios e 'uma vez por dia'."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 
 from .model import Generator, Rules
@@ -12,7 +12,8 @@ MAX_ATTEMPTS_PER_DAY = 3
 @dataclass
 class Block:
     reason: str  # weekday | brake | spend_cap
-    detail: str
+    detail: str  # em inglês, para o registro
+    params: dict = field(default_factory=dict)  # para o aviso traduzido (i18n "block.<reason>")
 
 
 def daily_quota(rules: Rules, cards_per_day: int, created: date, today: date) -> int:
@@ -28,9 +29,11 @@ def check_blocks(gen: Generator, today: date, overdue: int, month_cost: float) -
     if r.weekdays_enabled and today.weekday() not in r.weekdays:
         return Block("weekday", "not a generation day")
     if r.brake_enabled and overdue > r.brake_limit:
-        return Block("brake", f"{overdue} overdue cards (limit {r.brake_limit})")
+        return Block("brake", f"{overdue} overdue cards (limit {r.brake_limit})",
+                     {"overdue": overdue, "limit": r.brake_limit})
     if r.spend_cap_enabled and month_cost >= r.spend_cap_usd:
-        return Block("spend_cap", f"US$ {month_cost:.2f} spent this month (cap {r.spend_cap_usd:.2f})")
+        return Block("spend_cap", f"US$ {month_cost:.2f} spent this month (cap {r.spend_cap_usd:.2f})",
+                     {"spent": f"{month_cost:.2f}", "cap": f"{r.spend_cap_usd:.2f}"})
     return None
 
 

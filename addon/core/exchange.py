@@ -9,6 +9,7 @@ from __future__ import annotations
 import uuid
 from datetime import date
 
+from .i18n import tr
 from .model import Generator, PromptField, Rules
 
 FORMAT = "autocards-generator"
@@ -56,11 +57,11 @@ def _value(name: str, v, kind, rng):
     if kind == "days":
         if not isinstance(v, list) or not all(isinstance(d, int) and not isinstance(d, bool) and 0 <= d <= 6
                                               for d in v):
-            raise ExchangeError(f"invalid value for {name}")
+            raise ExchangeError(tr("exchange.invalid_value", name=name))
         return sorted(set(v))
     if kind == "strs":
         if not isinstance(v, list) or not all(isinstance(x, str) for x in v):
-            raise ExchangeError(f"invalid value for {name}")
+            raise ExchangeError(tr("exchange.invalid_value", name=name))
         return [x[:500] for x in v[:5000]]
     if kind is bool:
         ok = isinstance(v, bool)
@@ -71,35 +72,35 @@ def _value(name: str, v, kind, rng):
     else:
         ok = isinstance(v, str)
     if not ok:
-        raise ExchangeError(f"invalid value for {name}")
+        raise ExchangeError(tr("exchange.invalid_value", name=name))
     if rng is not None:
         v = kind(min(max(v, rng[0]), rng[1]))
     if kind is str:
         v = v[:20000]
         if name in _CHOICES and v not in _CHOICES[name]:
-            raise ExchangeError(f"invalid value for {name}")
+            raise ExchangeError(tr("exchange.invalid_value", name=name))
     return v
 
 
 def _clean(data: dict, spec: dict, where: str) -> dict:
     if not isinstance(data, dict):
-        raise ExchangeError(f"invalid {where}")
+        raise ExchangeError(tr("exchange.invalid_value", name=where))
     return {k: _value(k, data[k], *spec[k]) for k in spec if k in data}
 
 
 def _validated(data) -> dict:
     if not isinstance(data, dict) or data.get("format") != FORMAT:
-        raise ExchangeError("not an AutoCards generator file")
+        raise ExchangeError(tr("exchange.not_generator"))
     version = data.get("format_version")
     if not isinstance(version, int) or isinstance(version, bool) or version > FORMAT_VERSION:
-        raise ExchangeError(f"file format version {version} is newer than this add-on supports")
+        raise ExchangeError(tr("exchange.newer", version=version))
     raw = data.get("generator")
     if not isinstance(raw, dict) or not isinstance(raw.get("name"), str) or not raw["name"].strip():
-        raise ExchangeError("generator data missing")
+        raise ExchangeError(tr("exchange.missing"))
     g = _clean(raw, GEN_FIELDS, "generator")
     fields = raw.get("prompt_fields", [])
     if not isinstance(fields, list):
-        raise ExchangeError("invalid prompt_fields")
+        raise ExchangeError(tr("exchange.invalid_value", name="prompt_fields"))
     g["prompt_fields"] = [_clean(f, FIELD_FIELDS, "prompt field") for f in fields[:100]]
     g["rules"] = _clean(raw.get("rules", {}), RULE_FIELDS, "rules")
     return g

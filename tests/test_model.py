@@ -61,8 +61,11 @@ class CorruptConfigTest(unittest.TestCase):  # I2
             path = os.path.join(d, "autocards.json")
             with open(path, "w") as f:
                 f.write("{ not json")
-            with self.assertRaises(config_store.ConfigError):
+            with self.assertRaises(config_store.ConfigError) as cm:
                 config_store.load(path)
+            msg = str(cm.exception)
+            self.assertTrue(msg.startswith(os.path.join(os.path.basename(d), "autocards.json")))
+            self.assertNotIn(os.path.dirname(d), msg)
 
     def test_wrong_types_raise_config_error(self):
         with tempfile.TemporaryDirectory() as d:

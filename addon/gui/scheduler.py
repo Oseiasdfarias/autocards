@@ -82,7 +82,8 @@ def summarize(results: list[RunResult], pending: int = 0) -> tuple[str, bool]:
                 text += f" ({tr('summary.topics_done')})"
             parts.append(text)
         elif r.status == "blocked":
-            parts.append(tr("summary.blocked", name=r.generator_name, reason=r.message))
+            reason = tr(f"block.{r.reason}", **r.params) if r.reason else r.message
+            parts.append(tr("summary.blocked", name=r.generator_name, reason=reason))
         elif r.status == "error":
             had_error = True
             if _is_network(r.message):
