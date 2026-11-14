@@ -74,6 +74,23 @@ class GeneratorsDialogSmoke(GuiSmokeBase):
         self.assertNotIn(6, g.rules.weekdays)
         self.assertTrue(g.audio_enabled)
 
+    def test_v11_rules_saved(self):
+        d = self.make()
+        d.new_from_template("interview")
+        d.approval.setChecked(True)
+        d.reinforce.setChecked(True)
+        d.reinforce_lapses.setValue(4)
+        d.reinforce_per_day.setValue(1)
+        d.topics.setChecked(True)
+        d.topics_text.setPlainText("RAG\n\n  Fine-tuning  \nEvaluation")
+        d.topics_per_day.setValue(2)
+        d.save()
+        r = config_store.load(self.path).generators[0].rules
+        self.assertTrue(r.approval_enabled and r.reinforce_enabled and r.topics_enabled)
+        self.assertEqual((r.reinforce_min_lapses, r.reinforce_per_day, r.topics_per_day), (4, 1, 2))
+        self.assertEqual(r.topics, ["RAG", "Fine-tuning", "Evaluation"])
+        self.assertIn("0", d.topics_status.text())
+
     def test_preview_renders_topic_and_fixed_block(self):
         d = self.make()
         d.new_from_template("concepts")

@@ -28,3 +28,14 @@ class I18nTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SummaryTest(unittest.TestCase):
+    def test_summary_mentions_pending_and_topics(self):
+        from addon.ankiops.runner import RunResult
+        from addon.gui.scheduler import summarize
+        text, err = summarize([RunResult("Interview", "ok", 3, "3 new; topic list finished")], pending=3)
+        self.assertIn("Interview: 3 new", text)
+        self.assertIn("3 waiting for review", text)
+        self.assertIn("topic list finished", text)
+        self.assertFalse(err)

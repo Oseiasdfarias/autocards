@@ -56,17 +56,22 @@ def _on_profile_close() -> None:
     _state["abort"] = True
 
 
-def summarize(results: list[RunResult]) -> tuple[str, bool]:
+def summarize(results: list[RunResult], pending: int = 0) -> tuple[str, bool]:
     """Texto do aviso e se houve erro. Geradores pulados (já feitos hoje) não aparecem."""
     parts, had_error = [], False
     for r in results:
         if r.status == "ok":
-            parts.append(tr("summary.new", name=r.generator_name, n=r.inserted))
+            text = tr("summary.new", name=r.generator_name, n=r.inserted)
+            if "topic list finished" in r.message:
+                text += f" ({tr('summary.topics_done')})"
+            parts.append(text)
         elif r.status == "blocked":
             parts.append(tr("summary.blocked", name=r.generator_name, reason=r.message))
         elif r.status == "error":
             had_error = True
             parts.append(tr("summary.failed", name=r.generator_name))
+    if parts and pending:
+        parts.append(tr("summary.pending", n=pending))
     return " · ".join(parts), had_error
 
 
@@ -98,7 +103,8 @@ def run_due(force: bool = False, only: str | None = None, quiet_if_nothing: bool
     def done(results: list[RunResult]) -> None:
         _state["running"] = False
         config_store.update_run_state(CONFIG_PATH, cfg.generators)
-        text, had_error = summarize(results)
+        from ..ankiops.collection import pending_notes
+        text, had_error = summarize(results, len(pending_notes(mw.col)) if mw.col else 0)
         if not text:
             if not quiet_if_nothing:
                 tooltip(tr("summary.nothing"))

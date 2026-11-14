@@ -193,8 +193,29 @@ class GeneratorsDialog(QDialog):
         srow.addWidget(QLabel(tr("rule.spend_cap_detail")))
         srow.addWidget(self.spend_cap_usd)
         srow.addStretch(1)
+        self.approval = QCheckBox(tr("rule.approval"))
+        self.reinforce = QCheckBox(tr("rule.reinforce"))
+        self.reinforce_lapses, self.reinforce_per_day = _spin(1, 100), _spin(1, 50)
+        rrow = QHBoxLayout()
+        for lbl, sp in ((tr("rule.reinforce_lapses"), self.reinforce_lapses),
+                        (tr("rule.reinforce_per_day"), self.reinforce_per_day)):
+            rrow.addWidget(QLabel(lbl))
+            rrow.addWidget(sp)
+        rrow.addStretch(1)
+        self.topics = QCheckBox(tr("rule.topics"))
+        self.topics_text = QPlainTextEdit()
+        self.topics_text.setPlaceholderText(tr("rule.topics_placeholder"))
+        self.topics_text.setMaximumHeight(110)
+        self.topics_per_day = _spin(1, 50)
+        trow = QHBoxLayout()
+        trow.addWidget(QLabel(tr("rule.topics_per_day")))
+        trow.addWidget(self.topics_per_day)
+        self.topics_status = QLabel()
+        trow.addWidget(self.topics_status)
+        trow.addStretch(1)
         self.post_cmd = QLineEdit(self.cfg.post_run_command)
-        for item in (self.ramp, row, self.weekdays, days, self.brake, brow, self.no_repeat, self.spend_cap, srow):
+        for item in (self.ramp, row, self.weekdays, days, self.brake, brow, self.no_repeat, self.spend_cap, srow,
+                     self.approval, self.reinforce, rrow, self.topics, self.topics_text, trow):
             (v.addLayout if isinstance(item, QHBoxLayout) else v.addWidget)(item)
         v.addSpacing(16)
         v.addWidget(QLabel(tr("settings.post_cmd")))
@@ -226,8 +247,8 @@ class GeneratorsDialog(QDialog):
         if svc is not None and svc.provider == "edge":
             for voices in EDGE_VOICES.values():
                 self.voice.addItems(voices)
-        elif svc is not None:
-            self.voice.addItems(OPENAI_VOICES)
+        elif svc is not None and svc.provider == "openai":
+            self.voice.addItems(OPENAI_VOICES)  # ElevenLabs: o usuário digita o voice_id
         self.voice.setEditText(current)
 
     def _refresh_list(self) -> None:
@@ -279,6 +300,15 @@ class GeneratorsDialog(QDialog):
         self.no_repeat.setChecked(r.no_repeat)
         self.spend_cap.setChecked(r.spend_cap_enabled)
         self.spend_cap_usd.setValue(r.spend_cap_usd)
+        self.approval.setChecked(r.approval_enabled)
+        self.reinforce.setChecked(r.reinforce_enabled)
+        self.reinforce_lapses.setValue(r.reinforce_min_lapses)
+        self.reinforce_per_day.setValue(r.reinforce_per_day)
+        self.topics.setChecked(r.topics_enabled)
+        self.topics_text.setPlainText("\n".join(r.topics))
+        self.topics_per_day.setValue(r.topics_per_day)
+        self.topics_status.setText(tr("rule.topics_status", used=min(r.topics_next, len(r.topics)),
+                                      total=len(r.topics)))
         self._loading = False
         self.refresh_preview()
 
@@ -303,6 +333,7 @@ class GeneratorsDialog(QDialog):
         g.audio_service_id = self.audio_service.currentData() or ""
         g.voice = self.voice.currentText().strip()
         extra = g.rules.extra
+        topics = [t.strip() for t in self.topics_text.toPlainText().splitlines() if t.strip()]
         g.rules = Rules(
             ramp_enabled=self.ramp.isChecked(), ramp_start=self.ramp_start.value(),
             ramp_end=self.ramp_end.value(), ramp_weeks=self.ramp_weeks.value(),
@@ -310,7 +341,11 @@ class GeneratorsDialog(QDialog):
             weekdays=[i for i, b in enumerate(self.weekday_boxes) if b.isChecked()],
             brake_enabled=self.brake.isChecked(), brake_limit=self.brake_limit.value(),
             no_repeat=self.no_repeat.isChecked(), spend_cap_enabled=self.spend_cap.isChecked(),
-            spend_cap_usd=self.spend_cap_usd.value(), extra=extra)
+            spend_cap_usd=self.spend_cap_usd.value(),
+            approval_enabled=self.approval.isChecked(), reinforce_enabled=self.reinforce.isChecked(),
+            reinforce_min_lapses=self.reinforce_lapses.value(), reinforce_per_day=self.reinforce_per_day.value(),
+            topics_enabled=self.topics.isChecked(), topics=topics, topics_per_day=self.topics_per_day.value(),
+            topics_next=g.rules.topics_next, extra=extra)
         self.cfg.post_run_command = self.post_cmd.text().strip()
 
     def _changed(self, *_a) -> None:
@@ -381,6 +416,7 @@ class GeneratorsDialog(QDialog):
             d = state.get(g.id)
             if d is not None:
                 g.last_success, g.attempts_today = d.last_success, dict(d.attempts_today)
+                g.rules.topics_next = d.rules.topics_next
         disk.generators = self.cfg.generators
         disk.post_run_command = self.cfg.post_run_command
         config_store.save(CONFIG_PATH, disk)
