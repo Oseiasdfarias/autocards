@@ -6,6 +6,11 @@ title: Regras
 
 Cada regra liga e desliga na aba **Regras** de um gerador. Os padrões abaixo valem para um gerador novo.
 
+![Aba Regras, com a fila de revisão e a lista de tópicos ligadas](/img/screens/pt-BR/generator-rules-topics.png)
+
+*Aba Regras, com a fila de revisão e a lista de tópicos ligadas*
+
+
 | Regra | Padrão | Ajustes | O que faz |
 |---|---|---|---|
 | **Aumentar aos poucos** | ligada | começar com A, chegar a B em N semanas (2 → 10 em 4) | A quantidade do dia sobe em linha reta de A até B, contando do dia em que o gerador foi criado. Desligada, vale *Cards por dia*. |

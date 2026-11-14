@@ -11,6 +11,11 @@ title: Install
 
 You will find a new menu: **Tools › AutoCards**.
 
+![The AutoCards menu](/img/screens/en/menu.png)
+
+*The AutoCards menu*
+
+
 | Menu item | What it does |
 |---|---|
 | Generators… | Create and edit generators. |

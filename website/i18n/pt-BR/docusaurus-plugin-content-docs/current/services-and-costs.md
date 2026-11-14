@@ -6,6 +6,11 @@ title: Serviços e custos
 
 Um **serviço** é uma conexão que você configura uma vez em **Ferramentas › AutoCards › Serviços…**: nome, endereço base, chave de API, modelo padrão e preço. Cada gerador aponta para um serviço de texto e, se quiser, para um de áudio.
 
+![Serviços: uma conexão por provedor, com chave, modelo padrão e preços](/img/screens/pt-BR/services.png)
+
+*Serviços: uma conexão por provedor, com chave, modelo padrão e preços*
+
+
 ## Serviços de texto
 
 Qualquer serviço compatível com o **formato de chat da OpenAI** funciona. Os atalhos preenchem o endereço:

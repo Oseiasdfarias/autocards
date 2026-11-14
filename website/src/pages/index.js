@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import Translate, {translate} from '@docusaurus/Translate';
 import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
@@ -33,13 +34,14 @@ const FEATURES = [
 ];
 
 export default function Home() {
+  const logo = useBaseUrl('/img/logo.svg');
   return (
     <Layout
       title={translate({id: 'home.meta.title', message: 'AI flashcards for Anki, every day'})}
       description={translate({id: 'home.meta.description', message: 'AutoCards is an Anki add-on that writes new flashcards for you every day with AI.'})}>
       <header className={clsx('hero', styles.hero)}>
         <div className="container">
-          <img src={require('@site/static/img/logo.svg').default} alt="" className={styles.logo} />
+          <img src={logo} alt="AutoCards" className={styles.logo} />
           <Heading as="h1" className="hero__title">AutoCards</Heading>
           <p className="hero__subtitle">
             <Translate id="home.tagline">New Anki flashcards every day, written by AI, on their own.</Translate>

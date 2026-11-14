@@ -6,6 +6,11 @@ title: Services and costs
 
 A **service** is a connection you configure once in **Tools › AutoCards › Services…**: name, base URL, API key, default model and price. Each generator points to one text service and, optionally, one audio service.
 
+![Services: one connection per provider, with key, default model and prices](/img/screens/en/services.png)
+
+*Services: one connection per provider, with key, default model and prices*
+
+
 ## Text services
 
 Any service compatible with the **OpenAI chat format** works. Presets fill in the address:

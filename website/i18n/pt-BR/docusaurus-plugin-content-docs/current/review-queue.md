@@ -10,6 +10,11 @@ Com a regra ligada, os cards novos entram **suspensos** e com a etiqueta `autoca
 
 Abra **Ferramentas › AutoCards › Revisar cards gerados…**. A tela mostra um card por vez, com os campos editáveis:
 
+![A fila de revisão](/img/screens/pt-BR/review.png)
+
+*A fila de revisão*
+
+
 | Botão | O que acontece |
 |---|---|
 | **Aceitar (com suas edições)** | Salva as edições, tira a etiqueta e a suspensão. Registra `accepted`, ou `edited` com o texto original e o final. |

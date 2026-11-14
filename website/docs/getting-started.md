@@ -13,6 +13,12 @@ Open **Tools › AutoCards › Generators…**. The first time, the **setup assi
 2. **Paste your API key.** An API key is a password-like code that lets the add-on use your account. The assistant links to the page where you create it. Click **Test connection** to check it on the spot.
 3. **Finish.** The service is saved, together with free Edge audio.
 
+![Setup assistant: choose a service, then paste and test your key](/img/screens/en/wizard-1.png)
+![Setup assistant: choose a service, then paste and test your key](/img/screens/en/wizard-2.png)
+
+*Setup assistant: choose a service, then paste and test your key*
+
+
 You can change services later in **Tools › AutoCards › Services…**.
 
 ## 2. Create a generator
@@ -27,6 +33,11 @@ Click **+ New generator** and pick a starter template:
 | **Blank** | Writing your own prompt from scratch | All fields empty |
 
 Then, on the **Basic** tab, fill in what you want to study, the level, the cards per day and the target deck. See [Generators](generators.md) for every option.
+
+![The Basic tab of a Language generator](/img/screens/en/generator-basic.png)
+
+*The Basic tab of a Language generator*
+
 
 ## 3. Test before saving
 

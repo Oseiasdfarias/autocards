@@ -26,6 +26,11 @@ Click **Import…** and pick the file. AutoCards checks it and shows a summary b
 
 Then choose the **target deck**, the **text service** and the **audio service**. The imported generator:
 
+![Import: the summary shows volume and spending before anything is added](/img/screens/en/import.png)
+
+*Import: the summary shows volume and spending before anything is added*
+
+
 - uses your service's default model;
 - switches the voice to one that exists in the audio service you chose;
 - starts fresh, as if you had just created it.

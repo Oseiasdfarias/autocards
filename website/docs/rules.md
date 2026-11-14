@@ -6,6 +6,11 @@ title: Rules
 
 Each rule can be turned on or off on the **Rules** tab of a generator. The defaults below are for a new generator.
 
+![Rules tab, with the review queue and a topic list turned on](/img/screens/en/generator-rules-topics.png)
+
+*Rules tab, with the review queue and a topic list turned on*
+
+
 | Rule | Default | Settings | What it does |
 |---|---|---|---|
 | **Increase gradually** | on | start with A, reach B in N weeks (2 → 10 in 4) | The daily amount rises in a straight line from A to B, counted from the day the generator was created. When off, *Cards per day* is used. |

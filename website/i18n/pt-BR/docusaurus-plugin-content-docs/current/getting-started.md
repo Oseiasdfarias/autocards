@@ -13,6 +13,12 @@ Abra **Ferramentas › AutoCards › Geradores…**. Na primeira vez, abre o **a
 2. **Cole sua chave de API.** A chave de API é um código, parecido com uma senha, que deixa o add-on usar a sua conta. O assistente tem o link da página onde você cria a chave. Clique em **Testar conexão** para conferir na hora.
 3. **Concluir.** O serviço é salvo, junto com o áudio grátis do Edge.
 
+![Assistente de configuração: escolha o serviço, depois cole e teste a chave](/img/screens/pt-BR/wizard-1.png)
+![Assistente de configuração: escolha o serviço, depois cole e teste a chave](/img/screens/pt-BR/wizard-2.png)
+
+*Assistente de configuração: escolha o serviço, depois cole e teste a chave*
+
+
 Dá para mudar os serviços depois em **Ferramentas › AutoCards › Serviços…**.
 
 ## 2. Crie um gerador
@@ -27,6 +33,11 @@ Clique em **+ Novo gerador** e escolha um modelo inicial:
 | **Em branco** | Escrever seu próprio prompt do zero | Todos os campos vazios |
 
 Depois, na aba **Básico**, preencha o que você quer estudar, o nível, os cards por dia e o baralho de destino. Veja [Geradores](generators.md) para todas as opções.
+
+![A aba Básico de um gerador de Idioma](/img/screens/pt-BR/generator-basic.png)
+
+*A aba Básico de um gerador de Idioma*
+
 
 ## 3. Teste antes de salvar
 

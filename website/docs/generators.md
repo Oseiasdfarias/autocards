@@ -8,6 +8,11 @@ A generator is a recipe for cards. **Tools › AutoCards › Generators…** lis
 
 ## Basic
 
+![Basic tab](/img/screens/en/generator-basic.png)
+
+*Basic tab*
+
+
 | Field | Meaning |
 |---|---|
 | Name | How the generator appears in notices and in the log. |
@@ -20,6 +25,11 @@ A generator is a recipe for cards. **Tools › AutoCards › Generators…** lis
 | Your language / Language you study | Only on the Language template. They fill `{native_lang}` and `{target_lang}`. |
 
 ## Prompt
+
+![Prompt tab: fields on the left, the selected field's text on the right, and the final prompt below](/img/screens/en/generator-prompt.png)
+
+*Prompt tab: fields on the left, the selected field's text on the right, and the final prompt below*
+
 
 The prompt is built from **fields**, each describing one aspect of the card:
 
@@ -38,6 +48,11 @@ The **Final prompt** box shows exactly what is sent, live and read-only, with a 
 - the exact JSON format of the answer.
 
 ## Format & audio
+
+![Format & audio tab](/img/screens/en/generator-format.png)
+
+*Format & audio tab*
+
 
 | Option | Meaning |
 |---|---|

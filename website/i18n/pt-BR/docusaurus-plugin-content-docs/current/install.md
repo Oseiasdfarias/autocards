@@ -11,6 +11,11 @@ title: Instalação
 
 Aparece um menu novo: **Ferramentas › AutoCards**.
 
+![O menu do AutoCards](/img/screens/pt-BR/menu.png)
+
+*O menu do AutoCards*
+
+
 | Item do menu | O que faz |
 |---|---|
 | Geradores… | Criar e editar geradores. |

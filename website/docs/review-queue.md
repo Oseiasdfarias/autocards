@@ -10,6 +10,11 @@ With the rule on, new cards are added **suspended** and tagged `autocards::pendi
 
 Open **Tools › AutoCards › Review generated cards…**. It shows one card at a time with editable fields:
 
+![The review queue](/img/screens/en/review.png)
+
+*The review queue*
+
+
 | Button | What happens |
 |---|---|
 | **Accept (with your edits)** | Saves any edits, removes the tag and unsuspends the card. Logged as `accepted`, or `edited` with the original and final text. |

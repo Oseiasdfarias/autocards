@@ -8,6 +8,11 @@ Um gerador é uma receita de cards. **Ferramentas › AutoCards › Geradores…
 
 ## Básico
 
+![Aba Básico](/img/screens/pt-BR/generator-basic.png)
+
+*Aba Básico*
+
+
 | Campo | Significado |
 |---|---|
 | Nome | Como o gerador aparece nos avisos e no registro. |
@@ -20,6 +25,11 @@ Um gerador é uma receita de cards. **Ferramentas › AutoCards › Geradores…
 | Sua língua / Língua que você estuda | Só no modelo Idioma. Preenchem `{native_lang}` e `{target_lang}`. |
 
 ## Prompt
+
+![Aba Prompt: campos à esquerda, o texto do campo selecionado à direita e o prompt final embaixo](/img/screens/pt-BR/generator-prompt.png)
+
+*Aba Prompt: campos à esquerda, o texto do campo selecionado à direita e o prompt final embaixo*
+
 
 O prompt é montado a partir de **campos**, cada um descrevendo um aspecto do card:
 
@@ -38,6 +48,11 @@ A caixa **Prompt final** mostra exatamente o que é enviado, ao vivo e só para 
 - o formato JSON exato da resposta.
 
 ## Formato e áudio
+
+![Aba Formato e áudio](/img/screens/pt-BR/generator-format.png)
+
+*Aba Formato e áudio*
+
 
 | Opção | Significado |
 |---|---|

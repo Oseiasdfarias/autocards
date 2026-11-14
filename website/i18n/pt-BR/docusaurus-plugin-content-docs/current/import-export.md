@@ -26,6 +26,11 @@ Clique em **Importar…** e escolha o arquivo. O AutoCards confere o arquivo e m
 
 Depois você escolhe o **baralho de destino**, o **serviço de texto** e o **serviço de áudio**. O gerador importado:
 
+![Importar: o resumo mostra volume e gasto antes de adicionar qualquer coisa](/img/screens/pt-BR/import.png)
+
+*Importar: o resumo mostra volume e gasto antes de adicionar qualquer coisa*
+
+
 - usa o modelo padrão do seu serviço;
 - troca a voz por uma que exista no serviço de áudio escolhido;
 - começa do zero, como se você tivesse acabado de criá-lo.
