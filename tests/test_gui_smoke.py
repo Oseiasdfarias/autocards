@@ -230,6 +230,7 @@ class ReviewDialogSmoke(unittest.TestCase):
         store.add_card(run, "{}", b, False, "pending")
         store.close()
         d = ReviewDialog(None, col=col)
+        d.show()
         d.editors["Back"].setPlainText("b2")
         d.accept_current()
         d.discard_current()
@@ -239,3 +240,23 @@ class ReviewDialogSmoke(unittest.TestCase):
         self.addCleanup(s2.close)
         rows = dict(s2._db.execute("select note_id, outcome from cards").fetchall())
         self.assertEqual(rows, {a: "edited", b: "discarded"})
+        self.assertFalse(d.isVisible())  # fila vazia: a tela fecha sozinha
+
+    def test_dialog_has_close_button_and_closes_when_queue_ends(self):
+        from anki.collection import Collection
+        from addon.ankiops import collection as ops
+        from addon.gui import paths
+        from addon.gui.review_dialog import ReviewDialog
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        col = Collection(os.path.join(tmp.name, "c.anki2"))
+        self.addCleanup(col.close)
+        orig = paths.LOG_PATH
+        paths.LOG_PATH = os.path.join(tmp.name, "log.sqlite3")
+        self.addCleanup(setattr, paths, "LOG_PATH", orig)
+        ops.add_card(col, "Q", "basic", {"front": "a", "back": "b"}, None, "front", [], pending=True)
+        d = ReviewDialog(None, col=col)
+        d.show()
+        self.assertTrue(d.close_btn.isEnabled())
+        d.accept_current()
+        self.assertFalse(d.isVisible())

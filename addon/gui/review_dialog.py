@@ -33,12 +33,16 @@ class ReviewDialog(QDialog):
         self.play_btn.clicked.connect(self._play)
         self.accept_btn = QPushButton(tr("review.accept"))
         self.accept_btn.clicked.connect(self.accept_current)
+        self.accept_btn.setDefault(True)
         self.discard_btn = QPushButton(tr("review.discard"))
         self.discard_btn.clicked.connect(self.discard_current)
         skip = QPushButton(tr("review.skip"))
         skip.clicked.connect(self._next)
+        self.close_btn = QPushButton(tr("review.close"))
+        self.close_btn.clicked.connect(self.reject)
         row = QHBoxLayout()
         row.addWidget(self.play_btn)
+        row.addWidget(self.close_btn)
         row.addStretch(1)
         for b in (skip, self.discard_btn, self.accept_btn):
             row.addWidget(b)
@@ -58,6 +62,10 @@ class ReviewDialog(QDialog):
             self.header.setText(tr("review.empty"))
             for b in (self.accept_btn, self.discard_btn, self.play_btn):
                 b.setEnabled(False)
+            if self.isVisible():  # terminou a fila: fecha sozinha e avisa
+                if mw is not None:
+                    tooltip(tr("review.done"))
+                self.accept()
             return
         self.nid = self.queue[0]
         note = self.col.get_note(self.nid)

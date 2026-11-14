@@ -72,7 +72,11 @@ def _save_services(cfg) -> None:
 
 
 def open_review() -> None:
+    from ..ankiops.collection import pending_notes
     from .review_dialog import ReviewDialog
+    if not pending_notes(mw.col):
+        tooltip(tr("review.empty"))
+        return
     ReviewDialog(mw).exec()
 
 
