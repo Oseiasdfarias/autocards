@@ -53,3 +53,27 @@ class ModelTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RunStateMergeTest(unittest.TestCase):
+    def test_merge_keeps_user_edits(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "autocards.json")
+            on_disk = sample_config()
+            on_disk.generators[0].name = "Renamed by user"
+            config_store.save(path, on_disk)
+            ran = sample_config()
+            ran.generators[0].last_success = "2026-11-13"
+            ran.generators[0].attempts_today = {"2026-11-13": 1}
+            config_store.update_run_state(path, ran.generators)
+            loaded = config_store.load(path)
+            self.assertEqual(loaded.generators[0].name, "Renamed by user")
+            self.assertEqual(loaded.generators[0].last_success, "2026-11-13")
+            self.assertEqual(loaded.generators[0].attempts_today, {"2026-11-13": 1})
+
+    def test_merge_ignores_deleted_generator(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "autocards.json")
+            config_store.save(path, AppConfig())
+            config_store.update_run_state(path, sample_config().generators)
+            self.assertEqual(config_store.load(path).generators, [])

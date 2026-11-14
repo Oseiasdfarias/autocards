@@ -26,7 +26,8 @@ TEMPLATES: dict[str, dict] = {
                       "verbs, conditionals, common idioms; advanced: nuanced register, idiomatic expressions."),
             "front": "A short, natural phrase in {target_lang}, as actually spoken (up to 15 words).",
             "back": ("The translation in natural, colloquial {native_lang}, not literal. "
-                     "Example: 'Let me know' -> 'Me avisa'."),
+                     "Example: 'Let me know' -> 'Me avisa'. "
+                     "Context (if requested): one sentence in {native_lang} about the situation where the phrase is used."),
             "avoid": "Textbook or overly formal phrasing. Repeating the same sentence structure.",
             "examples": "Front: Can you take a look? / Back: Pode dar uma olhada?",
         },
