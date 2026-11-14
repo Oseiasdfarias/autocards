@@ -154,6 +154,16 @@ class RunnerTest(RunnerBase):
 
 
 
+class ApprovalRunnerTest(RunnerBase):
+    def test_approval_inserts_pending(self):
+        gen = make_gen(rules=Rules(ramp_enabled=False, approval_enabled=True))
+        r = self.run_gen(gen, FakeChat([{"front": "a", "back": "1"}]))
+        self.assertEqual(r.inserted, 1)
+        self.assertEqual(len(ops.pending_notes(self.col)), 1)
+        row = self.store._db.execute("select outcome from cards").fetchone()
+        self.assertEqual(row, ("pending",))
+
+
 class PhasesTest(RunnerBase):
     """C1: a rede roda numa fase sem a coleção; I1: abortar não gasta nem fecha o dia."""
 

@@ -112,3 +112,37 @@ class GeneratorsDialogSmoke(GuiSmokeBase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReviewDialogSmoke(unittest.TestCase):
+    def test_accept_edit_and_discard(self):
+        from anki.collection import Collection
+        from addon.ankiops import collection as ops
+        from addon.core.store import Store
+        from addon.gui import paths
+        from addon.gui.review_dialog import ReviewDialog
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        col = Collection(os.path.join(tmp.name, "c.anki2"))
+        self.addCleanup(col.close)
+        log = os.path.join(tmp.name, "log.sqlite3")
+        orig = paths.LOG_PATH
+        paths.LOG_PATH = log
+        self.addCleanup(setattr, paths, "LOG_PATH", orig)
+        store = Store(log)
+        run = store.start_run("g", 1, False)
+        a = ops.add_card(col, "Q", "basic", {"front": "a", "back": "b"}, None, "front", [], pending=True)
+        b = ops.add_card(col, "Q", "basic", {"front": "c", "back": "d"}, None, "front", [], pending=True)
+        store.add_card(run, "{}", a, False, "pending")
+        store.add_card(run, "{}", b, False, "pending")
+        store.close()
+        d = ReviewDialog(None, col=col)
+        d.editors["Back"].setPlainText("b2")
+        d.accept_current()
+        d.discard_current()
+        self.assertEqual(ops.pending_notes(col), [])
+        self.assertEqual(col.get_note(a)["Back"], "b2")
+        s2 = Store(log)
+        self.addCleanup(s2.close)
+        rows = dict(s2._db.execute("select note_id, outcome from cards").fetchall())
+        self.assertEqual(rows, {a: "edited", b: "discarded"})

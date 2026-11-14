@@ -67,6 +67,12 @@ class Store:
                 "INSERT INTO cards(run_id, content, note_id, has_audio, outcome, error) VALUES (?,?,?,?,?,?)",
                 (run_id, content, note_id, int(has_audio), outcome, error))
 
+    def set_outcome(self, note_id: int, outcome: str, original: str | None = None,
+                    final: str | None = None) -> None:
+        with self._lock, self._db:
+            self._db.execute("UPDATE cards SET outcome=?, original=?, final=? WHERE note_id=?",
+                             (outcome, original, final, note_id))
+
     def month_cost(self, year: int, month: int) -> float:
         prefix = f"{year:04d}-{month:02d}"
         with self._lock:

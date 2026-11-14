@@ -24,6 +24,7 @@ def setup() -> None:
 
     add(tr("menu.generators"), open_generators)
     add(tr("menu.services"), open_services)
+    add(tr("menu.review"), open_review)
     add(tr("menu.generate_now"), generate_now)
     add(tr("menu.export_log"), export_log)
 
@@ -46,6 +47,11 @@ def open_generators() -> None:
 def open_services() -> None:
     from .services_dialog import ServicesDialog
     _open(lambda: ServicesDialog(mw))
+
+
+def open_review() -> None:
+    from .review_dialog import ReviewDialog
+    ReviewDialog(mw).exec()
 
 
 def generate_now() -> None:

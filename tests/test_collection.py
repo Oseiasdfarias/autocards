@@ -93,3 +93,46 @@ class OpsTest(CollectionTestBase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ApprovalQueueTest(CollectionTestBase):
+    def add_pending(self, front="a"):
+        return ops.add_card(self.col, "Q", "basic", {"front": front, "back": "b"}, None, "front", [], pending=True)
+
+    def test_pending_is_suspended_and_queued(self):
+        nid = self.add_pending()
+        self.assertEqual(ops.pending_notes(self.col), [nid])
+        self.assertTrue(all(c.queue == -1 for c in self.col.get_note(nid).cards()))
+
+    def test_manually_unsuspended_stays_in_queue(self):
+        nid = self.add_pending()
+        self.col.sched.unsuspend_cards(self.col.get_note(nid).card_ids())
+        self.assertEqual(ops.pending_notes(self.col), [nid])
+
+    def test_accept_unsuspends_and_leaves_queue(self):
+        nid = self.add_pending()
+        original, final = ops.accept_note(self.col, nid, None)
+        self.assertEqual(ops.pending_notes(self.col), [])
+        self.assertTrue(all(c.queue != -1 for c in self.col.get_note(nid).cards()))
+        self.assertEqual(original, final)
+
+    def test_edit_and_accept(self):
+        nid = self.add_pending()
+        original, final = ops.accept_note(self.col, nid, {"Back": "edited"})
+        self.assertEqual((original["Back"], final["Back"]), ("b", "edited"))
+        self.assertEqual(self.col.get_note(nid)["Back"], "edited")
+
+    def test_discard_removes_note(self):
+        nid = self.add_pending()
+        ops.discard_note(self.col, nid)
+        self.assertEqual(ops.pending_notes(self.col), [])
+        self.assertEqual(self.col.find_notes(f"nid:{nid}"), [])
+
+    def test_note_deleted_elsewhere_leaves_queue(self):
+        nid = self.add_pending()
+        self.col.remove_notes([nid])
+        self.assertEqual(ops.pending_notes(self.col), [])
+
+    def test_queue_oldest_first(self):
+        a, b = self.add_pending("a"), self.add_pending("b")
+        self.assertEqual(ops.pending_notes(self.col), [a, b])

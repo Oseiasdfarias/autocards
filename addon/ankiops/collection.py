@@ -35,8 +35,11 @@ def write_audio(col, data: bytes, stem: str) -> str:
     return col.media.write_data(f"autocards_{stem}.mp3", data)
 
 
+PENDING_TAG = "autocards::pending"
+
+
 def add_card(col, deck: str, card_format: str, card: dict, audio_file: str | None,
-             audio_side: str, tags: list[str]) -> int:
+             audio_side: str, tags: list[str], pending: bool = False) -> int:
     nt = col.models.get(ensure_notetype(col, card_format))
     note = col.new_note(nt)
     if card_format == "cloze":
@@ -48,6 +51,27 @@ def add_card(col, deck: str, card_format: str, card: dict, audio_file: str | Non
     note["Context"] = to_html(card.get("context", ""))
     if audio_file:
         note["BackAudio" if audio_side == "back" else "FrontAudio"] = f"[sound:{audio_file}]"
-    note.tags = list(tags)
+    note.tags = list(tags) + ([PENDING_TAG] if pending else [])
     col.add_note(note, col.decks.id(deck))
+    if pending:  # fora do estudo até ser aceito (spec §7.5)
+        col.sched.suspend_cards(note.card_ids())
     return note.id
+
+
+def pending_notes(col) -> list[int]:
+    return sorted(col.find_notes(f"tag:{PENDING_TAG}"))
+
+
+def accept_note(col, nid: int, fields: dict | None) -> tuple[dict, dict]:
+    note = col.get_note(nid)
+    original = dict(note.items())
+    for k, v in (fields or {}).items():
+        note[k] = v
+    note.remove_tag(PENDING_TAG)
+    col.update_note(note)
+    col.sched.unsuspend_cards(note.card_ids())
+    return original, dict(note.items())
+
+
+def discard_note(col, nid: int) -> None:
+    col.remove_notes([nid])

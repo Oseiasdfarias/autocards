@@ -190,8 +190,11 @@ def commit(col, prep: Prepared, store: Store, should_abort=lambda: False) -> Run
             store.finish_run(prep.run_id, status="aborted", **_finish_fields(prep, inserted))
             return RunResult(gen.name, "aborted", inserted, "aborted (profile closed)")
         audio_file = write_audio(col, data, uuid.uuid4().hex[:16]) if data else None
-        nid = add_card(col, gen.deck, gen.card_format, card, audio_file, gen.audio_side, ["autocards"])
-        store.add_card(prep.run_id, json.dumps(card, ensure_ascii=False), nid, bool(audio_file), "inserted", err)
+        pending = gen.rules.approval_enabled
+        nid = add_card(col, gen.deck, gen.card_format, card, audio_file, gen.audio_side, ["autocards"],
+                       pending=pending)
+        store.add_card(prep.run_id, json.dumps(card, ensure_ascii=False), nid, bool(audio_file),
+                       "pending" if pending else "inserted", err)
         inserted += 1
     store.finish_run(prep.run_id, status="ok", **_finish_fields(prep, inserted))
     gen.last_success = prep.today.isoformat()

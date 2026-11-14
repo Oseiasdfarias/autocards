@@ -43,3 +43,12 @@ class StoreTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OutcomeTest(StoreTest):
+    def test_set_outcome_updates_card_row(self):
+        r = self.store.start_run("g", 1, False)
+        self.store.add_card(r, "{}", 77, False, "pending")
+        self.store.set_outcome(77, "edited", original='{"Back":"b"}', final='{"Back":"x"}')
+        row = self.store._db.execute("select outcome, original, final from cards where note_id=77").fetchone()
+        self.assertEqual(row, ("edited", '{"Back":"b"}', '{"Back":"x"}'))
