@@ -45,7 +45,7 @@ class FakeTTS:
         return b"ID3audio"
 
 
-class RunnerTest(unittest.TestCase):
+class RunnerBase(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
@@ -63,6 +63,8 @@ class RunnerTest(unittest.TestCase):
         return runner.run_generator(self.col, self.cfg, gen, self.store, TODAY, chat=chat,
                                     tts_factory=lambda svc: tts or FakeTTS(), **kw)
 
+
+class RunnerTest(RunnerBase):
     def test_happy_path_inserts_and_marks_day(self):
         gen = make_gen()
         r = self.run_gen(gen, FakeChat([{"front": "a", "back": "1"}, {"front": "b", "back": "2"}]))
@@ -149,6 +151,65 @@ class RunnerTest(unittest.TestCase):
         results = runner.run_all(self.col, self.cfg, self.store, TODAY, chat=chat,
                                  tts_factory=lambda s: FakeTTS())
         self.assertEqual([r.status for r in results], ["error", "ok"])
+
+
+
+class PhasesTest(RunnerBase):
+    """C1: a rede roda numa fase sem a coleção; I1: abortar não gasta nem fecha o dia."""
+
+    def test_prepare_does_not_call_network(self):
+        gen = make_gen()
+        self.cfg.generators = [gen]
+        prep = runner.prepare(self.col, self.cfg, gen, self.store, TODAY)
+        self.assertIsInstance(prep, runner.Prepared)
+        self.assertEqual(prep.count, 3)
+
+    def test_fetch_takes_no_collection_and_commit_writes(self):
+        gen = make_gen(audio_enabled=True, audio_service_id="tts", voice="v")
+        self.cfg.generators = [gen]
+        prep = runner.prepare(self.col, self.cfg, gen, self.store, TODAY)
+        runner.fetch(prep, chat=FakeChat([{"front": "a", "back": "1"}]), tts_factory=lambda s: FakeTTS())
+        self.assertEqual(self.col.find_notes("deck:Deck"), [])
+        r = runner.commit(self.col, prep, self.store)
+        self.assertEqual((r.status, r.inserted), ("ok", 1))
+
+    def test_abort_between_generators_spends_nothing(self):
+        a, b = make_gen("A", deck="DA"), make_gen("B", deck="DB")
+        self.cfg.generators = [a, b]
+        chat = FakeChat([{"front": "z", "back": "1"}])
+        results = runner.run_all(self.col, self.cfg, self.store, TODAY, chat=chat,
+                                 tts_factory=lambda s: FakeTTS(), should_abort=lambda: True)
+        self.assertEqual([r.status for r in results], ["aborted", "aborted"])
+        self.assertEqual(chat.calls, [])
+        self.assertIsNone(a.last_success)
+        self.assertIsNone(b.last_success)
+
+    def test_abort_before_write_does_not_close_day(self):
+        gen = make_gen()
+        r = self.run_gen(gen, FakeChat([{"front": "a", "back": "1"}]), should_abort=lambda: True)
+        self.assertEqual(r.status, "aborted")
+        self.assertIsNone(gen.last_success)
+
+    def test_filter_uses_all_existing_not_only_prompt_sample(self):  # I3
+        import uuid
+        fronts = [uuid.uuid4().hex for _ in range(200)]
+        for f in fronts:
+            ops.add_card(self.col, "Deck", "basic", {"front": f, "back": "x"}, None, "front", [])
+        gen = make_gen()
+        chat = FakeChat([{"front": fronts[0], "back": "1"}, {"front": "brand new", "back": "2"}])
+        r = self.run_gen(gen, chat)
+        self.assertNotIn(fronts[0], chat.calls[0][1]["content"])  # o mais antigo fica fora da amostra
+        self.assertEqual(r.inserted, 1)
+
+    def test_zero_valid_cards_is_error_not_done(self):  # M4
+        gen = make_gen()
+
+        def chat(*a, **k):
+            return ChatResult([], 10, 10, "raw", 3)
+        r = self.run_gen(gen, chat)
+        self.assertEqual(r.status, "error")
+        self.assertIsNone(gen.last_success)
+        self.assertEqual(gen.attempts_today, {"2026-11-13": 1})
 
 
 if __name__ == "__main__":

@@ -18,8 +18,13 @@ def overdue_count(col, deck: str) -> int:
 
 
 def existing_fronts(col, deck: str) -> list[str]:
-    nids = sorted(col.find_notes(_deck_search(col, deck)), reverse=True)  # id = criação
-    return [col.get_note(nid).fields[0] for nid in nids]
+    """Primeiro campo de todas as notas do baralho (qualquer tipo), mais recentes primeiro."""
+    from anki.utils import ids2str
+    nids = col.find_notes(_deck_search(col, deck))
+    if not nids:
+        return []
+    rows = col.db.list(f"select flds from notes where id in {ids2str(nids)} order by id desc")
+    return [r.split("\x1f", 1)[0] for r in rows]
 
 
 def to_html(text: str) -> str:

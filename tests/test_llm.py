@@ -34,6 +34,20 @@ class LLMTest(unittest.TestCase):
         self.assertEqual(len(r.cards), 1)
         self.assertEqual(r.dropped_invalid, 1)
 
+    def test_empty_or_blank_fields_dropped(self):  # I4
+        content = json.dumps({"cards": [{"front": "a", "back": ""}, {"front": "b", "back": "  "},
+                                        {"front": "c", "back": "ok"}]})
+        r = self.run_with([chat_reply(content)])
+        self.assertEqual(([c["front"] for c in r.cards], r.dropped_invalid), (["c"], 2))
+
+    def test_cloze_without_deletion_dropped(self):  # I4
+        self.srv = FakeServer([chat_reply(json.dumps({"cards": [
+            {"text": "plain sentence", "back_extra": "x"},
+            {"text": "The {{c1::cat}} sat", "back_extra": "x"}]}))])
+        self.addCleanup(self.srv.close)
+        r = llm.chat_cards(self.srv.url, "", "m", MSGS, response_schema("cloze", False), timeout=5)
+        self.assertEqual((len(r.cards), r.dropped_invalid), (1, 1))
+
     def test_400_retries_without_response_format(self):
         r = self.run_with([(400, {"error": "no json_schema"}, "application/json"), chat_reply(GOOD)])
         self.assertEqual(len(r.cards), 1)

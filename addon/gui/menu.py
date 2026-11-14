@@ -6,7 +6,7 @@ from datetime import datetime
 
 from aqt import mw
 from aqt.qt import QAction, QFileDialog, QMenu
-from aqt.utils import tooltip
+from aqt.utils import showWarning, tooltip
 
 from ..core.i18n import tr
 from ..core.store import Store
@@ -28,14 +28,24 @@ def setup() -> None:
     add(tr("menu.export_log"), export_log)
 
 
+def _open(factory) -> None:
+    from ..core.config_store import ConfigError
+    try:
+        dialog = factory()
+    except ConfigError as e:  # não abre a tela para não sobrescrever a config que o usuário quebrou
+        showWarning(tr("config.invalid", err=str(e)[:300]))
+        return
+    dialog.exec()
+
+
 def open_generators() -> None:
     from .generator_dialog import GeneratorsDialog
-    GeneratorsDialog(mw).exec()
+    _open(lambda: GeneratorsDialog(mw))
 
 
 def open_services() -> None:
     from .services_dialog import ServicesDialog
-    ServicesDialog(mw).exec()
+    _open(lambda: ServicesDialog(mw))
 
 
 def generate_now() -> None:

@@ -55,6 +55,24 @@ if __name__ == "__main__":
     unittest.main()
 
 
+class CorruptConfigTest(unittest.TestCase):  # I2
+    def test_syntax_error_raises_config_error(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "autocards.json")
+            with open(path, "w") as f:
+                f.write("{ not json")
+            with self.assertRaises(config_store.ConfigError):
+                config_store.load(path)
+
+    def test_wrong_types_raise_config_error(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "autocards.json")
+            with open(path, "w") as f:
+                f.write('{"generators": [{"id": "g", "name": "n", "prompt_fields": [1]}]}')
+            with self.assertRaises(config_store.ConfigError):
+                config_store.load(path)
+
+
 class RunStateMergeTest(unittest.TestCase):
     def test_merge_keeps_user_edits(self):
         with tempfile.TemporaryDirectory() as d:

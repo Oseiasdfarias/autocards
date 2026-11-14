@@ -6,14 +6,14 @@ import subprocess
 from datetime import date
 
 from aqt import gui_hooks, mw
-from aqt.operations import QueryOp
 from aqt.utils import tooltip
 
-from ..ankiops.runner import RunResult, run_all
+from ..ankiops.runner import RunResult
 from ..core import config_store, i18n
+from ..core.config_store import ConfigError
 from ..core.i18n import tr
-from ..core.store import Store
-from .paths import CONFIG_PATH, LOG_PATH
+from .paths import CONFIG_PATH
+from .phases import run_phases
 
 HOUR_MS = 3600 * 1000
 _state = {"running": False, "abort": False, "timer": None}
@@ -25,6 +25,15 @@ def setup() -> None:
 
 
 def _on_profile_open() -> None:
+    # Nunca deixa exceção sair do hook: o Anki removeria o hook e pularia a sincronização ao abrir.
+    try:
+        _profile_open()
+    except Exception as e:
+        print(f"AutoCards: {e!r}")
+        tooltip(f"AutoCards: {e}", period=10000)
+
+
+def _profile_open() -> None:
     try:
         from anki.lang import current_lang
         i18n.set_lang(current_lang)
@@ -32,8 +41,15 @@ def _on_profile_open() -> None:
         pass
     _state["abort"] = False
     if _state["timer"] is None:
-        _state["timer"] = mw.progress.timer(HOUR_MS, run_due, True, parent=mw)
+        _state["timer"] = mw.progress.timer(HOUR_MS, _safe_run_due, True, parent=mw)
     run_due()
+
+
+def _safe_run_due() -> None:
+    try:
+        run_due()
+    except Exception as e:
+        print(f"AutoCards: {e!r}")
 
 
 def _on_profile_close() -> None:
@@ -67,21 +83,17 @@ def _post_run(cmd: str, ok: bool, msg: str) -> None:
 def run_due(force: bool = False, only: str | None = None, quiet_if_nothing: bool = True) -> None:
     if _state["running"] or mw.col is None:
         return
-    cfg = config_store.load(CONFIG_PATH)
+    try:
+        cfg = config_store.load(CONFIG_PATH)
+    except ConfigError as e:
+        tooltip(tr("config.invalid", err=str(e)[:200]), period=10000)
+        return
     if not cfg.generators:
         if not quiet_if_nothing:
             tooltip(tr("summary.nothing"))
         return
     _state["running"] = True
     today = date.today()
-
-    def op(col):
-        store = Store(LOG_PATH)
-        try:
-            return run_all(col, cfg, store, today, force=force, only=only,
-                           should_abort=lambda: _state["abort"])
-        finally:
-            store.close()
 
     def done(results: list[RunResult]) -> None:
         _state["running"] = False
@@ -103,4 +115,5 @@ def run_due(force: bool = False, only: str | None = None, quiet_if_nothing: bool
 
     if not quiet_if_nothing:
         tooltip(tr("summary.running"))
-    QueryOp(parent=mw, op=op, success=done).failure(failed).run_in_background()
+    run_phases(mw, cfg, today, force=force, only=only, should_abort=lambda: _state["abort"],
+               on_done=done, on_fail=failed)

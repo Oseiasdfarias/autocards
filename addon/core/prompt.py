@@ -7,15 +7,17 @@ from .model import Generator
 
 
 def response_schema(card_format: str, context_field: bool) -> dict:
+    filled = {"type": "string", "pattern": "\\S"}  # não vazio nem só espaços (spec §6.3 passo 6)
     if card_format == "cloze":
         props = {
-            "text": {"type": "string", "description": "Sentence with {{c1::...}} cloze deletions"},
-            "back_extra": {"type": "string"},
+            "text": {"type": "string", "pattern": "\\{\\{c\\d+::",
+                     "description": "Sentence with {{c1::...}} cloze deletions"},
+            "back_extra": dict(filled),
         }
     else:
-        props = {"front": {"type": "string"}, "back": {"type": "string"}}
+        props = {"front": dict(filled), "back": dict(filled)}
     if context_field:
-        props["context"] = {"type": "string", "description": "One short sentence on when this is used"}
+        props["context"] = {**filled, "description": "One short sentence on when this is used"}
     item = {
         "type": "object",
         "properties": props,

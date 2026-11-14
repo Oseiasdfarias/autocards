@@ -8,12 +8,22 @@ import tempfile
 from .model import AppConfig, app_config_from_dict, to_dict
 
 
+class ConfigError(Exception):
+    """Config ilegível (editada à mão com erro). Nunca é sobrescrita automaticamente."""
+
+
 def load(path: str) -> AppConfig:
     try:
         with open(path, encoding="utf-8") as f:
-            return app_config_from_dict(json.load(f))
+            data = json.load(f)
     except FileNotFoundError:
         return AppConfig()
+    except (ValueError, OSError) as e:
+        raise ConfigError(f"{path}: {e}") from e
+    try:
+        return app_config_from_dict(data)
+    except Exception as e:
+        raise ConfigError(f"{path}: {type(e).__name__}: {e}") from e
 
 
 def save(path: str, cfg: AppConfig) -> None:

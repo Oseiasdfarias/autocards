@@ -396,22 +396,14 @@ class GeneratorsDialog(QDialog):
         if self.current is None or mw is None or mw.col is None:
             return
         self._store_form()
-        from aqt.operations import QueryOp
-        from ..ankiops.runner import run_generator
-        from ..core.store import Store
-        from .paths import LOG_PATH
-        cfg, gen = copy.deepcopy(self.cfg), copy.deepcopy(self.current)
+        from .phases import run_phases
+        cfg = copy.deepcopy(self.cfg)
+        gen = next(g for g in cfg.generators if g.id == self.current.id)
         self.test_btn.setEnabled(False)
 
-        def op(col):
-            store = Store(LOG_PATH)
-            try:
-                return run_generator(col, cfg, gen, store, date.today(), is_test=True)
-            finally:
-                store.close()
-
-        def done(result) -> None:
+        def done(results) -> None:
             self.test_btn.setEnabled(True)
+            result = results[0]
             if result.status != "ok":
                 QMessageBox.warning(self, tr("gen.test"), result.message)
                 return
@@ -429,7 +421,7 @@ class GeneratorsDialog(QDialog):
             self.test_btn.setEnabled(True)
             QMessageBox.warning(self, tr("gen.test"), str(exc))
 
-        QueryOp(parent=self, op=op, success=done).failure(failed).run_in_background()
+        run_phases(self, cfg, date.today(), only=gen.id, is_test=True, on_done=done, on_fail=failed)
 
     def _listen(self) -> None:
         self._store_form()
