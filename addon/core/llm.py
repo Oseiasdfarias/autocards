@@ -37,6 +37,11 @@ def _parse(content: str) -> list | None:
     return data["cards"]
 
 
+def _all_required(schema: dict) -> bool:
+    item = schema["properties"]["cards"]["items"]
+    return set(item.get("required", [])) == set(item.get("properties", {}))
+
+
 def _post(url: str, headers: dict, body: dict, timeout: float, http) -> "requests.Response":
     try:
         return http.post(url, headers=headers, json=body, timeout=timeout)
@@ -58,10 +63,10 @@ def chat_cards(base_url: str, api_key: str, model: str, messages: list[dict], sc
     while json_attempts < 2:
         body = {"model": model, "messages": messages}
         if use_format:
-            body["response_format"] = {
-                "type": "json_schema",
-                "json_schema": {"name": "cards", "schema": schema},
-            }
+            js = {"name": "cards", "schema": schema}
+            if _all_required(schema):  # modo estrito: o serviço garante todos os campos obrigatórios
+                js["strict"] = True
+            body["response_format"] = {"type": "json_schema", "json_schema": js}
         resp = _post(url, headers, body, timeout, http)
         if resp.status_code == 400 and use_format:
             use_format = False  # serviço sem saída estruturada: pede JSON só pelo prompt

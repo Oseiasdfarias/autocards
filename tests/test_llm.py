@@ -24,6 +24,18 @@ class LLMTest(unittest.TestCase):
         self.assertEqual(path, "/chat/completions")
         self.assertEqual(body["response_format"]["type"], "json_schema")
 
+    def test_strict_when_all_fields_required(self):
+        self.run_with([chat_reply(GOOD)])
+        rf = self.srv.requests[0][2]["response_format"]["json_schema"]
+        self.assertIs(rf["strict"], True)
+
+    def test_not_strict_with_optional_field(self):
+        schema = response_schema("basic", False, reinforcement=True)
+        self.srv = FakeServer([chat_reply(GOOD)])
+        self.addCleanup(self.srv.close)
+        llm.chat_cards(self.srv.url, "", "m", MSGS, schema, timeout=5)
+        self.assertNotIn("strict", self.srv.requests[0][2]["response_format"]["json_schema"])
+
     def test_fenced_json_accepted(self):
         r = self.run_with([chat_reply("```json\n" + GOOD + "\n```")])
         self.assertEqual(len(r.cards), 1)
