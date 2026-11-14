@@ -44,5 +44,5 @@ def update_run_state(path: str, generators) -> None:
         if ran is not None:
             g.last_success = ran.last_success
             g.attempts_today = dict(ran.attempts_today)
-            g.rules.topics_next = ran.rules.topics_next
+            g.rules.topics_done = list(ran.rules.topics_done)
     save(path, cfg)

@@ -18,12 +18,13 @@ def response_schema(card_format: str, context_field: bool, reinforcement: bool =
         props = {"front": dict(filled), "back": dict(filled)}
     if context_field:
         props["context"] = {**filled, "description": "One short sentence on when this is used"}
+    required = list(props)
     if reinforcement:
-        props["reinforcement"] = {"type": "boolean"}
+        props["reinforcement"] = {"type": "boolean"}  # opcional: ausente = false
     item = {
         "type": "object",
         "properties": props,
-        "required": list(props),
+        "required": required,
         "additionalProperties": False,
     }
     return {

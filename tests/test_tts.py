@@ -49,6 +49,14 @@ class ElevenLabsTest(unittest.TestCase):
         with self.assertRaises(TTSError):
             ElevenLabsTTS(srv.url, "bad").synthesize("Hello", "v")
 
+    def test_empty_voice_raises_without_request(self):
+        from addon.core.tts.elevenlabs import ElevenLabsTTS
+        srv = FakeServer([(200, MP3, "audio/mpeg")])
+        self.addCleanup(srv.close)
+        with self.assertRaises(TTSError):
+            ElevenLabsTTS(srv.url, "k").synthesize("Hello", "")
+        self.assertEqual(srv.requests, [])
+
     def test_factory(self):
         from addon.core.tts.elevenlabs import ElevenLabsTTS
         svc = Service(id="x", name="X", kind="tts", provider="elevenlabs", api_key="k")

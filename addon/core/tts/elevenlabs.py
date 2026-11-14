@@ -1,6 +1,8 @@
 """Áudio pela ElevenLabs (POST /text-to-speech/{voice_id})."""
 from __future__ import annotations
 
+from urllib.parse import quote
+
 import requests
 
 from .base import TTSError
@@ -16,6 +18,9 @@ class ElevenLabsTTS:
         self.timeout = timeout
 
     def synthesize(self, text: str, voice: str) -> bytes:
+        if not (voice or "").strip():
+            raise TTSError("ElevenLabs needs a voice ID (Format & audio tab)")
+        voice = quote(voice.strip(), safe="")
         headers = {"xi-api-key": self.api_key, "Content-Type": "application/json", "Accept": "audio/mpeg"}
         try:
             r = requests.post(f"{self.base_url}/text-to-speech/{voice}", headers=headers,

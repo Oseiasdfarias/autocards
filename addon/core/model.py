@@ -41,7 +41,7 @@ class Rules:
     topics_enabled: bool = False
     topics: list[str] = field(default_factory=list)
     topics_per_day: int = 1
-    topics_next: int = 0
+    topics_done: list[str] = field(default_factory=list)  # tópicos já usados, pelo texto
     extra: dict[str, Any] = field(default_factory=dict)
 
 

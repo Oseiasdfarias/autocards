@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import json
 import os
 import sqlite3
 import threading
@@ -72,6 +73,19 @@ class Store:
         with self._lock, self._db:
             self._db.execute("UPDATE cards SET outcome=?, original=?, final=? WHERE note_id=?",
                              (outcome, original, final, note_id))
+
+    def discarded_contents(self, generator_id: str) -> list[dict]:
+        with self._lock:
+            rows = self._db.execute(
+                "SELECT c.content FROM cards c JOIN runs r ON r.id = c.run_id "
+                "WHERE r.generator_id=? AND c.outcome='discarded'", (generator_id,)).fetchall()
+        out = []
+        for (content,) in rows:
+            try:
+                out.append(json.loads(content))
+            except (TypeError, ValueError):
+                pass
+        return out
 
     def month_cost(self, year: int, month: int) -> float:
         prefix = f"{year:04d}-{month:02d}"

@@ -57,7 +57,7 @@ class PromptTest(unittest.TestCase):
 
     def test_schema_reinforcement_flag(self):
         item = prompt.response_schema("basic", False, reinforcement=True)["properties"]["cards"]["items"]
-        self.assertIn("reinforcement", item["required"])
+        self.assertNotIn("reinforcement", item["required"])  # opcional: ausente = false
         self.assertEqual(item["properties"]["reinforcement"], {"type": "boolean"})
 
     def test_schema_cloze_requires_text(self):

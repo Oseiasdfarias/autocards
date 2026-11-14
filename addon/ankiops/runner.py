@@ -49,7 +49,7 @@ class Prepared:
     model: str
     started: float
     reinforce_nids: list[int] = field(default_factory=list)
-    topics_used: int = 0
+    topics_chosen: list[str] = field(default_factory=list)
     topics_finished: bool = False
     # preenchidos por fetch
     cards: list[dict] = field(default_factory=list)
@@ -106,6 +106,9 @@ def prepare(col, cfg: AppConfig, gen: Generator, store: Store, today: date, forc
     count = 1 if is_test else rules.daily_quota(gen.rules, gen.cards_per_day,
                                                 date.fromisoformat(gen.created or today.isoformat()), today)
     existing_all = existing_fronts(col, gen.deck) if gen.rules.no_repeat else []
+    if gen.rules.no_repeat:  # descartados na fila de aprovação não voltam (spec §7.5)
+        key = "text" if gen.card_format == "cloze" else "front"
+        existing_all += [c.get(key, "") for c in store.discarded_contents(gen.id) if isinstance(c, dict)]
     sample = [dedupe.normalize(x) for x in dedupe.sample_existing(existing_all)]
     extras: list[str] = []
     reinforce: list[tuple[int, str]] = []
@@ -116,8 +119,9 @@ def prepare(col, cfg: AppConfig, gen: Generator, store: Store, today: date, forc
             extras.append(prompt.reinforcement_block([dedupe.normalize(f) for _n, f in reinforce], len(reinforce)))
     topics: list[str] = []
     r = gen.rules
-    if r.topics_enabled and r.topics_next < len(r.topics):
-        topics = r.topics[r.topics_next:r.topics_next + max(1, r.topics_per_day)]
+    remaining = [t for t in r.topics if t not in set(r.topics_done)] if r.topics_enabled else []
+    if remaining:
+        topics = remaining[:max(1, r.topics_per_day)]
         extras.append("Generate the cards about these topics, in order:\n" + "\n".join(f"- {t}" for t in topics))
     has_r = bool(reinforce)
     messages = prompt.build_messages(gen, count, [x for x in sample if x], extras, reinforcement=has_r)
@@ -125,8 +129,8 @@ def prepare(col, cfg: AppConfig, gen: Generator, store: Store, today: date, forc
                     existing_all=existing_all, messages=messages,
                     schema=prompt.response_schema(gen.card_format, gen.context_field, has_r),
                     model=gen.text_model or svc.default_model, started=started,
-                    reinforce_nids=[n for n, _f in reinforce], topics_used=len(topics),
-                    topics_finished=bool(topics) and r.topics_next + len(topics) >= len(r.topics))
+                    reinforce_nids=[n for n, _f in reinforce], topics_chosen=topics,
+                    topics_finished=bool(topics) and len(topics) >= len(remaining))
 
 
 def fetch(prep: Prepared, chat=chat_cards, tts_factory=make_tts, should_abort=lambda: False) -> Prepared:
@@ -148,8 +152,13 @@ def fetch(prep: Prepared, chat=chat_cards, tts_factory=make_tts, should_abort=la
         prep.error = f"no valid cards in the AI reply ({result.dropped_invalid} invalid)"
         return prep
     key = "text" if gen.card_format == "cloze" else "front"
-    cards, prep.dropped_dupe = dedupe.filter_cards(result.cards, key, prep.existing_all)
-    prep.cards = cards[:prep.count]
+    normal = [c for c in result.cards if not c.get("reinforcement")]
+    reinf = [c for c in result.cards if c.get("reinforcement")]
+    kept, dropped = dedupe.filter_cards(normal, key, prep.existing_all)
+    # reforço re-explica uma nota existente: compara só com o próprio lote, não com o baralho
+    kept_r, dropped_r = dedupe.filter_cards(reinf, key, [c.get(key, "") for c in kept])
+    prep.dropped_dupe = dropped + dropped_r
+    prep.cards = (kept_r + kept)[:prep.count]
 
     tts_svc = prep.cfg.service(gen.audio_service_id) if gen.audio_enabled else None
     tts = None
@@ -215,12 +224,16 @@ def commit(col, prep: Prepared, store: Store, should_abort=lambda: False) -> Run
         store.add_card(prep.run_id, json.dumps(card, ensure_ascii=False), nid, bool(audio_file),
                        "pending" if pending else "inserted", err)
         inserted += 1
-    if prep.reinforce_nids and any(c.get("reinforcement") for c in prep.cards):
+    if prep.reinforce_nids:  # usadas uma vez só, mesmo se a IA ignorar o pedido (evita repetir para sempre)
         col.tags.bulk_add(prep.reinforce_nids, REINFORCED_TAG)
     store.finish_run(prep.run_id, status="ok", **_finish_fields(prep, inserted))
     gen.last_success = prep.today.isoformat()
-    gen.rules.topics_next += prep.topics_used
-    msg = f"{inserted} new" + ("; topic list finished" if prep.topics_finished else "")
+    finished = False
+    if inserted:  # tópico só conta como usado se entrou algum card
+        gen.rules.topics_done = gen.rules.topics_done + [t for t in prep.topics_chosen
+                                                         if t not in gen.rules.topics_done]
+        finished = prep.topics_finished
+    msg = f"{inserted} new" + ("; topic list finished" if finished else "")
     return RunResult(gen.name, "ok", inserted, msg)
 
 

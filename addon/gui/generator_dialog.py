@@ -25,6 +25,18 @@ SIDES = ["front", "back"]
 TEMPLATE_KEYS = ["language", "interview", "concepts", "blank"]
 
 
+def voices_for(provider: str) -> list[str]:
+    if provider == "edge":
+        return [v for vs in EDGE_VOICES.values() for v in vs]
+    if provider == "openai":
+        return list(OPENAI_VOICES)
+    return []
+
+
+def default_voice(provider: str) -> str:
+    return {"edge": EDGE_VOICES["en-US"][0], "openai": "alloy"}.get(provider, "")
+
+
 def _spin(lo: int, hi: int) -> QSpinBox:
     s = QSpinBox()
     s.setRange(lo, hi)
@@ -243,12 +255,15 @@ class GeneratorsDialog(QDialog):
     def _fill_voices(self) -> None:
         current = self.voice.currentText()
         svc = self.cfg.service(self.audio_service.currentData() or "")
+        provider = svc.provider if svc else ""
+        options = voices_for(provider)
         self.voice.clear()
-        if svc is not None and svc.provider == "edge":
-            for voices in EDGE_VOICES.values():
-                self.voice.addItems(voices)
-        elif svc is not None and svc.provider == "openai":
-            self.voice.addItems(OPENAI_VOICES)  # ElevenLabs: o usuário digita o voice_id
+        self.voice.addItems(options)
+        known = {v for vs in EDGE_VOICES.values() for v in vs} | set(OPENAI_VOICES)
+        if options and current not in options:
+            current = default_voice(provider)  # voz de outro serviço não serve aqui
+        elif not options and current in known:
+            current = ""  # ElevenLabs: o usuário cola o voice ID
         self.voice.setEditText(current)
 
     def _refresh_list(self) -> None:
@@ -307,7 +322,7 @@ class GeneratorsDialog(QDialog):
         self.topics.setChecked(r.topics_enabled)
         self.topics_text.setPlainText("\n".join(r.topics))
         self.topics_per_day.setValue(r.topics_per_day)
-        self.topics_status.setText(tr("rule.topics_status", used=min(r.topics_next, len(r.topics)),
+        self.topics_status.setText(tr("rule.topics_status", used=len(set(r.topics) & set(r.topics_done)),
                                       total=len(r.topics)))
         self._loading = False
         self.refresh_preview()
@@ -345,7 +360,7 @@ class GeneratorsDialog(QDialog):
             approval_enabled=self.approval.isChecked(), reinforce_enabled=self.reinforce.isChecked(),
             reinforce_min_lapses=self.reinforce_lapses.value(), reinforce_per_day=self.reinforce_per_day.value(),
             topics_enabled=self.topics.isChecked(), topics=topics, topics_per_day=self.topics_per_day.value(),
-            topics_next=g.rules.topics_next, extra=extra)
+            topics_done=g.rules.topics_done, extra=extra)
         self.cfg.post_run_command = self.post_cmd.text().strip()
 
     def _changed(self, *_a) -> None:
@@ -384,7 +399,7 @@ class GeneratorsDialog(QDialog):
         tts = self._services("tts")
         if g.audio_enabled and tts:
             g.audio_service_id = tts[0].id
-            g.voice = EDGE_VOICES["en-US"][0] if tts[0].provider == "edge" else "alloy"
+            g.voice = default_voice(tts[0].provider)
         self.cfg.generators.append(g)
         self._refresh_list()
         self.tabs.setEnabled(True)
@@ -416,7 +431,7 @@ class GeneratorsDialog(QDialog):
             d = state.get(g.id)
             if d is not None:
                 g.last_success, g.attempts_today = d.last_success, dict(d.attempts_today)
-                g.rules.topics_next = d.rules.topics_next
+                g.rules.topics_done = list(d.rules.topics_done)
         disk.generators = self.cfg.generators
         disk.post_run_command = self.cfg.post_run_command
         config_store.save(CONFIG_PATH, disk)

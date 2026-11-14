@@ -198,6 +198,17 @@ class ReinforceTest(RunnerBase):
         new = self.col.find_notes("tag:autocards::reinforcement")
         self.assertEqual([self.col.get_note(n)["Front"] for n in new], ["new angle on it"])
 
+    def test_reinforcement_card_not_dropped_as_duplicate_of_its_source(self):
+        self.add_struggling("ephemeral", 5)
+        r = self.run_gen(self.rgen(), FakeChat([{"front": "ephemeral", "back": "short-lived (new angle)",
+                                                 "reinforcement": True}]))
+        self.assertEqual(r.inserted, 1)
+
+    def test_sources_tagged_even_if_ai_ignores_flag(self):
+        self.add_struggling("hard one", 5)
+        self.run_gen(self.rgen(), FakeChat([{"front": "x1", "back": "1", "reinforcement": False}]))
+        self.assertEqual(len(self.col.find_notes("tag:autocards::reinforced")), 1)
+
     def test_reinforced_sources_not_reused(self):
         self.add_struggling("hard one", 5)
         self.run_gen(self.rgen(), FakeChat([{"front": "x1", "back": "1", "reinforcement": True}]))
@@ -205,6 +216,20 @@ class ReinforceTest(RunnerBase):
         chat = FakeChat([{"front": "x2", "back": "1", "reinforcement": False}])
         self.run_gen(gen, chat)
         self.assertNotIn("Reinforcement", chat.calls[0][1]["content"])
+
+
+class DiscardedMemoryTest(RunnerBase):
+    def test_discarded_card_not_generated_again(self):
+        gen = make_gen()
+        self.run_gen(gen, FakeChat([{"front": "rejected one", "back": "1"}]))
+        nid = self.col.find_notes("deck:Deck")[0]
+        self.store.set_outcome(nid, "discarded")
+        ops.discard_note(self.col, nid)
+        gen.last_success = None
+        chat = FakeChat([{"front": "rejected one", "back": "1"}, {"front": "fresh", "back": "2"}])
+        r = self.run_gen(gen, chat)
+        self.assertEqual(r.inserted, 1)
+        self.assertIn("rejected one", chat.calls[0][1]["content"])
 
 
 class TopicsTest(RunnerBase):
@@ -223,7 +248,7 @@ class TopicsTest(RunnerBase):
         c1 = FakeChat([{"front": "q1", "back": "1"}])
         self.day(gen, 0, c1)
         self.assertIn("- alpha\n- beta", c1.calls[0][1]["content"])
-        self.assertEqual(gen.rules.topics_next, 2)
+        self.assertEqual(gen.rules.topics_done, ["alpha", "beta"])
         c2 = FakeChat([{"front": "q2", "back": "1"}])
         r2 = self.day(gen, 1, c2)
         block = c2.calls[0][1]["content"]
@@ -238,7 +263,23 @@ class TopicsTest(RunnerBase):
     def test_failure_does_not_advance(self):
         gen = self.tgen()
         self.day(gen, 0, FakeChat(error=LLMError("offline")))
-        self.assertEqual(gen.rules.topics_next, 0)
+        self.assertEqual(gen.rules.topics_done, [])
+
+    def test_nothing_inserted_does_not_consume_topics(self):
+        ops.add_card(self.col, "Deck", "basic", {"front": "dup", "back": "x"}, None, "front", [])
+        gen = self.tgen()
+        self.day(gen, 0, FakeChat([{"front": "dup", "back": "1"}]))
+        self.assertEqual(gen.rules.topics_done, [])
+
+    def test_replaced_list_starts_fresh_and_edits_keep_used(self):
+        gen = self.tgen()
+        gen.rules.topics_done = ["alpha", "beta"]
+        gen.rules.topics = ["new1", "alpha", "new2"]
+        c = FakeChat([{"front": "q", "back": "1"}])
+        self.day(gen, 0, c)
+        content = c.calls[0][1]["content"]
+        self.assertIn("- new1\n- new2", content)
+        self.assertNotIn("- alpha", content)
 
 
 class PhasesTest(RunnerBase):

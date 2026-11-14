@@ -91,6 +91,27 @@ class GeneratorsDialogSmoke(GuiSmokeBase):
         self.assertEqual(r.topics, ["RAG", "Fine-tuning", "Evaluation"])
         self.assertIn("0", d.topics_status.text())
 
+    def test_switching_audio_service_resets_incompatible_voice(self):
+        cfg = config_store.load(self.path)
+        cfg.services += [Service(id="oa", name="OA", kind="tts", provider="openai"),
+                         Service(id="el", name="EL", kind="tts", provider="elevenlabs")]
+        config_store.save(self.path, cfg)
+        d = self.make()
+        d.new_from_template("language")
+        d.audio_service.setCurrentIndex(d.audio_service.findData("oa"))
+        self.assertIn(d.voice.currentText(), ["alloy", "ash", "coral", "echo", "fable", "nova", "onyx", "sage", "shimmer"])
+        d.audio_service.setCurrentIndex(d.audio_service.findData("el"))
+        self.assertEqual(d.voice.currentText(), "")
+
+    def test_new_language_generator_with_elevenlabs_has_no_openai_voice(self):
+        cfg = config_store.load(self.path)
+        cfg.services += [Service(id="el", name="EL", kind="tts", provider="elevenlabs")]
+        config_store.save(self.path, cfg)
+        d = self.make()
+        d.new_from_template("language")
+        d.save()
+        self.assertEqual(config_store.load(self.path).generators[0].voice, "")
+
     def test_preview_renders_topic_and_fixed_block(self):
         d = self.make()
         d.new_from_template("concepts")

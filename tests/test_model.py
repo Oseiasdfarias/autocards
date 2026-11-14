@@ -83,10 +83,10 @@ class RunStateMergeTest(unittest.TestCase):
             ran = sample_config()
             ran.generators[0].last_success = "2026-11-13"
             ran.generators[0].attempts_today = {"2026-11-13": 1}
-            ran.generators[0].rules.topics_next = 4
+            ran.generators[0].rules.topics_done = ["x"]
             config_store.update_run_state(path, ran.generators)
             loaded = config_store.load(path)
-            self.assertEqual(loaded.generators[0].rules.topics_next, 4)
+            self.assertEqual(loaded.generators[0].rules.topics_done, ["x"])
             self.assertEqual(loaded.generators[0].name, "Renamed by user")
             self.assertEqual(loaded.generators[0].last_success, "2026-11-13")
             self.assertEqual(loaded.generators[0].attempts_today, {"2026-11-13": 1})
@@ -104,12 +104,12 @@ class V11RulesTest(unittest.TestCase):
         cfg = app_config_from_dict({"generators": [{"id": "g", "name": "n", "rules": {"brake_limit": 5}}]})
         r = cfg.generators[0].rules
         self.assertEqual((r.brake_limit, r.approval_enabled, r.reinforce_enabled, r.topics_enabled), (5, False, False, False))
-        self.assertEqual((r.reinforce_min_lapses, r.reinforce_per_day, r.topics_per_day, r.topics_next), (3, 2, 1, 0))
-        self.assertEqual(r.topics, [])
+        self.assertEqual((r.reinforce_min_lapses, r.reinforce_per_day, r.topics_per_day), (3, 2, 1))
+        self.assertEqual((r.topics, r.topics_done), ([], []))
 
     def test_topics_roundtrip(self):
         cfg = sample_config()
         cfg.generators[0].rules.topics = ["a", "b"]
-        cfg.generators[0].rules.topics_next = 1
+        cfg.generators[0].rules.topics_done = ["a"]
         back = app_config_from_dict(to_dict(cfg))
-        self.assertEqual((back.generators[0].rules.topics, back.generators[0].rules.topics_next), (["a", "b"], 1))
+        self.assertEqual((back.generators[0].rules.topics, back.generators[0].rules.topics_done), (["a", "b"], ["a"]))
