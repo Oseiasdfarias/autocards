@@ -25,7 +25,8 @@ def test_service(svc: Service) -> None:
         if r.status_code >= 400:
             raise RuntimeError(f"HTTP {r.status_code}: {r.text[:200]}")
     else:
-        voice = EDGE_VOICES["en-US"][0] if svc.provider == "edge" else "alloy"
+        voice = {"edge": EDGE_VOICES["en-US"][0], "elevenlabs": svc.extra.get("test_voice", "21m00Tcm4TlvDq8ikWAM")}.get(
+            svc.provider, "alloy")
         make_tts(svc).synthesize("Hello", voice)
 
 

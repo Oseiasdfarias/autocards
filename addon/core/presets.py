@@ -15,4 +15,6 @@ TTS_PRESETS = {
     "Edge (free)": {"provider": "edge", "base_url": "", "default_model": "", "price_per_k_chars": 0.0},
     "OpenAI TTS": {"provider": "openai", "base_url": "https://api.openai.com/v1",
                    "default_model": "gpt-4o-mini-tts", "price_per_k_chars": 0.015},
+    "ElevenLabs": {"provider": "elevenlabs", "base_url": "https://api.elevenlabs.io/v1",
+                   "default_model": "eleven_multilingual_v2", "price_per_k_chars": 0.30},
 }

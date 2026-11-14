@@ -29,6 +29,32 @@ class OpenAITTSTest(unittest.TestCase):
             OpenAITTS(srv.url, "x", "m").synthesize("Hello", "alloy")
 
 
+class ElevenLabsTest(unittest.TestCase):
+    def test_returns_bytes_and_sends_request(self):
+        from addon.core.tts.elevenlabs import ElevenLabsTTS
+        srv = FakeServer([(200, MP3, "audio/mpeg")])
+        self.addCleanup(srv.close)
+        out = ElevenLabsTTS(srv.url, "xi-key").synthesize("Hello", "VOICE123")
+        self.assertEqual(out, MP3)
+        path, headers, body = srv.requests[0]
+        h = {k.lower(): v for k, v in headers.items()}
+        self.assertEqual(path, "/text-to-speech/VOICE123")
+        self.assertEqual(h["xi-api-key"], "xi-key")
+        self.assertEqual(body, {"text": "Hello", "model_id": "eleven_multilingual_v2"})
+
+    def test_bad_key_raises(self):
+        from addon.core.tts.elevenlabs import ElevenLabsTTS
+        srv = FakeServer([(401, {"detail": "invalid key"}, "application/json")])
+        self.addCleanup(srv.close)
+        with self.assertRaises(TTSError):
+            ElevenLabsTTS(srv.url, "bad").synthesize("Hello", "v")
+
+    def test_factory(self):
+        from addon.core.tts.elevenlabs import ElevenLabsTTS
+        svc = Service(id="x", name="X", kind="tts", provider="elevenlabs", api_key="k")
+        self.assertIsInstance(tts.make_tts(svc), ElevenLabsTTS)
+
+
 class FactoryTest(unittest.TestCase):
     def test_make_tts(self):
         self.assertIsInstance(tts.make_tts(Service(id="e", name="Edge", kind="tts", provider="edge")), EdgeTTS)

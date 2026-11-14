@@ -24,4 +24,7 @@ def make_tts(service: Service) -> TTSProvider:
     if service.provider == "openai":
         from .openai_tts import OpenAITTS
         return OpenAITTS(service.base_url, service.api_key, service.default_model)
+    if service.provider == "elevenlabs":
+        from .elevenlabs import ElevenLabsTTS
+        return ElevenLabsTTS(service.base_url, service.api_key, service.default_model)
     raise TTSError(f"unknown audio provider: {service.provider}")
