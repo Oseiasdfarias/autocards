@@ -1,40 +1,66 @@
-# AutoCards (nome provisório)
+# AutoCards
 
-Add-on do Anki que cria cards novos todo dia, sozinho, com IA. Cada pessoa configura geradores (tema, prompt por campos, formato, áudio e regras), e o add-on gera a cota do dia ao abrir o Anki.
+**An Anki add-on that writes new flashcards for you every day, with AI, on its own.**
 
-**Estado:** versão 1.0 implementada (branch `feature/v1.0`), em validação.
+You set up *generators*: a topic, how the cards should be written, the card format, optional audio and a few rules. When you open Anki, each generator creates its daily quota in the background and tells you when it is done. Nothing to click, nothing to install besides the add-on.
 
-## Documentação
+> Status: version 1.1, in real-world validation by the author. Interface in English and Portuguese.
 
-| Onde | O quê |
+## Why
+
+AI add-ons for Anki generate cards *when you ask*. AutoCards is built for a habit instead:
+
+- **Generates by itself, once a day** per generator, when the profile opens (and checks every hour if Anki stays open overnight). Missed days do not pile up.
+- **Protects you from avalanches:** it pauses when your overdue reviews pile up, can ramp the daily amount up slowly, and has a monthly spending cap.
+- **Prompts you can actually edit:** the prompt is split into fields (AI role, topic, level, front, back, what to avoid, examples). Toggle, reorder or add your own, with a live preview of the final prompt.
+- **Audio with the service you choose:** free Microsoft Edge voices, OpenAI or ElevenLabs.
+- **Quality you can measure:** every run and every card is logged (prompt, model, tokens, estimated cost, what you accepted, edited or discarded). Export it as CSV.
+
+## Features
+
+- Starter templates: **Language**, **Technical interview**, **Concepts**, **Blank**.
+- Card formats: front/back, front/back + reversed, cloze. Optional "Context" field.
+- Rules: increase gradually · only on some weekdays · pause when reviews pile up · don't repeat existing cards · spending cap · **approve before adding** (review queue) · **reinforce what you get wrong** · **follow a topic list**.
+- Text services: anything that speaks the OpenAI chat format — OpenAI, OpenRouter, Groq, Ollama (local), LM Studio (local).
+- Export/import generators as `.autocards.json` files (keys, services and decks are never exported).
+- Setup assistant that explains API keys and tests yours on the spot.
+
+## Install
+
+1. In Anki (26.09 or newer): *Tools › Add-ons › Install from file…* and pick `autocards.ankiaddon`.
+2. Restart Anki and open *Tools › AutoCards › Generators…*. The setup assistant opens the first time.
+
+No Python packages, no command line: it runs only on what ships with Anki.
+
+## Costs
+
+You use your own AI account. With `gpt-4o-mini`, ten cards a day cost a few US cents **per month**; Edge audio is free. Local models (Ollama, LM Studio) cost nothing. Prices in the add-on are estimates you can edit; the spending cap uses them.
+
+## Privacy
+
+- Your API keys stay in the add-on's `user_files` folder on your computer. They never go into exported generators, the log or the CSV.
+- Card text is sent only to the services you configure.
+- Edge audio uses Microsoft's public read-aloud service (unofficial). If it changes, switch audio to OpenAI or ElevenLabs.
+
+## For sensitive topics
+
+For medicine, law or anything where a wrong fact matters, turn on **Approve before adding**: generated cards wait in *Tools › AutoCards › Review generated cards…* until you accept, edit or discard them.
+
+## Development
+
+Everything runs on the Python bundled with Anki — no pip.
+
+| Command | What |
 |---|---|
-| [`docs/superpowers/specs/2026-11-10-autocards-design.md`](docs/superpowers/specs/2026-11-10-autocards-design.md) | Documento de desenho: o que é, por quê, comportamento, telas, fases |
-| [`docs/mockups/`](docs/mockups/) | Rascunhos de tela aprovados: escolha da tela (B), aba Prompt, aba Regras |
-| [`docs/reference/sistemas-atuais.md`](docs/reference/sistemas-atuais.md) | Os três sistemas que o add-on substitui e o que reaproveitar deles |
-| [`docs/research/2026-11-10-mercado.md`](docs/research/2026-11-10-mercado.md) | Concorrentes, mercado brasileiro e licença |
+| `scripts/test.sh` | Test suite (`unittest`) on Anki's Python |
+| `AUTOCARDS_NET=1 scripts/test.sh` | Also runs the live Edge TTS test |
+| `scripts/dev-link.sh` | Links `addon/` into Anki's add-ons folder |
+| `scripts/build.sh` | Builds `dist/autocards.ankiaddon` |
 
-| [`docs/superpowers/plans/`](docs/superpowers/plans/) | Planos de implementação |
+Layout: `addon/core/` (pure Python: model, prompt, AI client, rules, log, audio), `addon/ankiops/` (collection operations and the three-phase run: read → network → write, so Anki never waits on the network), `addon/gui/` (menu, dialogs, scheduling).
 
-## Desenvolvimento
+Design and plans (Portuguese): [`docs/LEIAME.md`](docs/LEIAME.md).
 
-Nada para instalar: tudo roda com o Python que vem no Anki 26.09.
+## License
 
-| Comando | O quê |
-|---|---|
-| `scripts/test.sh` | Testes (`unittest`) com o Python do Anki |
-| `AUTOCARDS_NET=1 scripts/test.sh` | Inclui o teste real do Edge TTS (precisa de internet) |
-| `scripts/dev-link.sh` | Liga `addon/` à pasta de add-ons do Anki (`ANKI_ADDONS=` muda o destino) |
-| `scripts/build.sh` | Gera `dist/autocards.ankiaddon` |
-
-Estrutura:
-
-- `addon/core/`: Python puro (modelo, prompt, IA, regras, registro, áudio);
-- `addon/ankiops/`: operações na coleção e a execução de um gerador;
-- `addon/gui/`: menu, telas e agendamento (só dentro do Anki).
-
-Dados do usuário ficam em `addon/user_files/` (`autocards.json` e `log.sqlite3`), fora do git e do pacote.
-
-Para testar sem tocar no perfil real, use uma pasta de dados separada:
-`anki -b /caminho/de/teste -p AutoCards-dev`.
-
-> O README público do add-on, em inglês, será escrito na fase de publicação.
+AGPL-3.0-or-later. See [LICENSE](LICENSE). Includes the Edge token routine adapted from [edge-tts](https://github.com/rany2/edge-tts) (LGPL-3.0).

@@ -39,3 +39,9 @@ class SummaryTest(unittest.TestCase):
         self.assertIn("3 waiting for review", text)
         self.assertIn("topic list finished", text)
         self.assertFalse(err)
+
+
+class CompletenessTest(unittest.TestCase):
+    def test_pt_complete(self):
+        missing = set(i18n.STRINGS["en"]) - set(i18n.STRINGS["pt"]) - {"menu.title", "common.ok"}
+        self.assertEqual(missing, set())
