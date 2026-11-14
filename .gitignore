@@ -7,3 +7,4 @@ addon/user_files/*
 !addon/user_files/README.txt
 .superpowers/
 .env
+dist/
