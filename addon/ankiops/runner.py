@@ -20,7 +20,8 @@ from ..core.llm import chat_cards
 from ..core.model import AppConfig, Generator, Service
 from ..core.store import Store
 from ..core.tts import make_tts
-from .collection import add_card, existing_fronts, overdue_count, write_audio
+from .collection import (REINFORCED_TAG, REINFORCEMENT_TAG, add_card, existing_fronts, overdue_count,
+                         struggling_fronts, write_audio)
 
 _CLOZE = re.compile(r"\{\{c\d+::(.*?)(?:::[^}]*)?\}\}")
 
@@ -47,6 +48,7 @@ class Prepared:
     schema: dict
     model: str
     started: float
+    reinforce_nids: list[int] = field(default_factory=list)
     # preenchidos por fetch
     cards: list[dict] = field(default_factory=list)
     audio: list[tuple[bytes | None, str | None]] = field(default_factory=list)
@@ -103,11 +105,20 @@ def prepare(col, cfg: AppConfig, gen: Generator, store: Store, today: date, forc
                                                 date.fromisoformat(gen.created or today.isoformat()), today)
     existing_all = existing_fronts(col, gen.deck) if gen.rules.no_repeat else []
     sample = [dedupe.normalize(x) for x in dedupe.sample_existing(existing_all)]
-    messages = prompt.build_messages(gen, count, [x for x in sample if x], [])
+    extras: list[str] = []
+    reinforce: list[tuple[int, str]] = []
+    if gen.rules.reinforce_enabled and not is_test:
+        reinforce = struggling_fronts(col, gen.deck, gen.rules.reinforce_min_lapses,
+                                      min(gen.rules.reinforce_per_day, count))
+        if reinforce:
+            extras.append(prompt.reinforcement_block([dedupe.normalize(f) for _n, f in reinforce], len(reinforce)))
+    has_r = bool(reinforce)
+    messages = prompt.build_messages(gen, count, [x for x in sample if x], extras, reinforcement=has_r)
     return Prepared(cfg=cfg, gen=gen, svc=svc, run_id=run_id, today=today, is_test=is_test, count=count,
                     existing_all=existing_all, messages=messages,
-                    schema=prompt.response_schema(gen.card_format, gen.context_field),
-                    model=gen.text_model or svc.default_model, started=started)
+                    schema=prompt.response_schema(gen.card_format, gen.context_field, has_r),
+                    model=gen.text_model or svc.default_model, started=started,
+                    reinforce_nids=[n for n, _f in reinforce])
 
 
 def fetch(prep: Prepared, chat=chat_cards, tts_factory=make_tts, should_abort=lambda: False) -> Prepared:
@@ -191,11 +202,13 @@ def commit(col, prep: Prepared, store: Store, should_abort=lambda: False) -> Run
             return RunResult(gen.name, "aborted", inserted, "aborted (profile closed)")
         audio_file = write_audio(col, data, uuid.uuid4().hex[:16]) if data else None
         pending = gen.rules.approval_enabled
-        nid = add_card(col, gen.deck, gen.card_format, card, audio_file, gen.audio_side, ["autocards"],
-                       pending=pending)
+        tags = ["autocards"] + ([REINFORCEMENT_TAG] if card.get("reinforcement") else [])
+        nid = add_card(col, gen.deck, gen.card_format, card, audio_file, gen.audio_side, tags, pending=pending)
         store.add_card(prep.run_id, json.dumps(card, ensure_ascii=False), nid, bool(audio_file),
                        "pending" if pending else "inserted", err)
         inserted += 1
+    if prep.reinforce_nids and any(c.get("reinforcement") for c in prep.cards):
+        col.tags.bulk_add(prep.reinforce_nids, REINFORCED_TAG)
     store.finish_run(prep.run_id, status="ok", **_finish_fields(prep, inserted))
     gen.last_success = prep.today.isoformat()
     return RunResult(gen.name, "ok", inserted, f"{inserted} new")

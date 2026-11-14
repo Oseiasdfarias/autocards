@@ -6,7 +6,7 @@ import json
 from .model import Generator
 
 
-def response_schema(card_format: str, context_field: bool) -> dict:
+def response_schema(card_format: str, context_field: bool, reinforcement: bool = False) -> dict:
     filled = {"type": "string", "pattern": "\\S"}  # não vazio nem só espaços (spec §6.3 passo 6)
     if card_format == "cloze":
         props = {
@@ -18,6 +18,8 @@ def response_schema(card_format: str, context_field: bool) -> dict:
         props = {"front": dict(filled), "back": dict(filled)}
     if context_field:
         props["context"] = {**filled, "description": "One short sentence on when this is used"}
+    if reinforcement:
+        props["reinforcement"] = {"type": "boolean"}
     item = {
         "type": "object",
         "properties": props,
@@ -47,7 +49,8 @@ def user_part(gen: Generator) -> str:
     return "\n\n".join(parts)
 
 
-def fixed_block(gen: Generator, count: int, existing: list[str], extras: list[str]) -> str:
+def fixed_block(gen: Generator, count: int, existing: list[str], extras: list[str],
+                reinforcement: bool = False) -> str:
     lines = [f"Generate exactly {count} cards."]
     if gen.target_lang:
         lines.append(
@@ -61,13 +64,21 @@ def fixed_block(gen: Generator, count: int, existing: list[str], extras: list[st
         lines.append(extra)
     lines.append(
         "Reply with JSON only, no markdown, matching this JSON Schema:\n"
-        + json.dumps(response_schema(gen.card_format, gen.context_field))
+        + json.dumps(response_schema(gen.card_format, gen.context_field, reinforcement))
     )
     return "\n".join(lines)
 
 
-def build_messages(gen: Generator, count: int, existing: list[str], extras: list[str]) -> list[dict]:
+def build_messages(gen: Generator, count: int, existing: list[str], extras: list[str],
+                   reinforcement: bool = False) -> list[dict]:
     return [
         {"role": "system", "content": user_part(gen)},
-        {"role": "user", "content": fixed_block(gen, count, existing, extras)},
+        {"role": "user", "content": fixed_block(gen, count, existing, extras, reinforcement)},
     ]
+
+
+def reinforcement_block(fronts: list[str], k: int) -> str:
+    lines = [f"Reinforcement: the learner keeps getting these wrong. Make {k} of the cards re-explain them "
+             'in a different way, and set "reinforcement": true on those cards (false on the others):']
+    lines.extend(f"- {f}" for f in fronts)
+    return "\n".join(lines)

@@ -36,6 +36,20 @@ def write_audio(col, data: bytes, stem: str) -> str:
 
 
 PENDING_TAG = "autocards::pending"
+REINFORCED_TAG = "autocards::reinforced"  # nota de origem já usada para reforço
+REINFORCEMENT_TAG = "autocards::reinforcement"  # card novo criado como reforço
+
+
+def struggling_fronts(col, deck: str, min_lapses: int, limit: int) -> list[tuple[int, str]]:
+    """Notas do baralho com algum cartão errado `min_lapses`+ vezes, ainda não usadas para reforço."""
+    from anki.utils import ids2str
+    nids = col.find_notes(_deck_search(col, deck, f"prop:lapses>={int(min_lapses)}", f"-tag:{REINFORCED_TAG}"))
+    if not nids or limit <= 0:
+        return []
+    rows = col.db.all(
+        f"select n.id, n.flds, max(c.lapses) as l from notes n join cards c on c.nid = n.id "
+        f"where n.id in {ids2str(nids)} group by n.id order by l desc, n.id limit {int(limit)}")
+    return [(nid, flds.split("\x1f", 1)[0]) for nid, flds, _l in rows]
 
 
 def add_card(col, deck: str, card_format: str, card: dict, audio_file: str | None,

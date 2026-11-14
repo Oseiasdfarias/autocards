@@ -164,6 +164,49 @@ class ApprovalRunnerTest(RunnerBase):
         self.assertEqual(row, ("pending",))
 
 
+class ReinforceTest(RunnerBase):
+    def add_struggling(self, front, lapses):
+        nid = ops.add_card(self.col, "Deck", "basic", {"front": front, "back": "x"}, None, "front", [])
+        for card in self.col.get_note(nid).cards():
+            card.lapses = lapses
+            self.col.update_card(card)
+        return nid
+
+    def rgen(self):
+        return make_gen(rules=Rules(ramp_enabled=False, reinforce_enabled=True, reinforce_min_lapses=3,
+                                    reinforce_per_day=2))
+
+    def test_no_struggling_cards_no_block(self):
+        self.add_struggling("easy one", 1)
+        chat = FakeChat([{"front": "a", "back": "1"}])
+        self.run_gen(self.rgen(), chat)
+        self.assertNotIn("Reinforcement", chat.calls[0][1]["content"])
+
+    def test_reinforcement_block_limit_and_tags(self):
+        n1, n2, n3 = (self.add_struggling(f"hard {i} zzz{i*7}", 3 + i) for i in range(3))
+        cards = [{"front": "new angle on it", "back": "1", "reinforcement": True},
+                 {"front": "plain new", "back": "2", "reinforcement": False}]
+        chat = FakeChat(cards)
+        self.run_gen(self.rgen(), chat)
+        content = chat.calls[0][1]["content"]
+        self.assertIn("Reinforcement", content)
+        block = content.split("Reinforcement:")[1].split("Reply with JSON")[0]
+        self.assertEqual(sum(f"hard {i}" in block for i in range(3)), 2)
+        self.assertIn('"reinforcement"', content)  # schema pede o campo
+        reinforced = set(self.col.find_notes("tag:autocards::reinforced"))
+        self.assertEqual(len(reinforced), 2)
+        new = self.col.find_notes("tag:autocards::reinforcement")
+        self.assertEqual([self.col.get_note(n)["Front"] for n in new], ["new angle on it"])
+
+    def test_reinforced_sources_not_reused(self):
+        self.add_struggling("hard one", 5)
+        self.run_gen(self.rgen(), FakeChat([{"front": "x1", "back": "1", "reinforcement": True}]))
+        gen = self.rgen()
+        chat = FakeChat([{"front": "x2", "back": "1", "reinforcement": False}])
+        self.run_gen(gen, chat)
+        self.assertNotIn("Reinforcement", chat.calls[0][1]["content"])
+
+
 class PhasesTest(RunnerBase):
     """C1: a rede roda numa fase sem a coleção; I1: abortar não gasta nem fecha o dia."""
 
