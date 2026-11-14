@@ -5,6 +5,8 @@
 You set up *generators*: a topic, how the cards should be written, the card format, optional audio and a few rules. When you open Anki, each generator creates its daily quota in the background and tells you when it is done. Nothing to click, nothing to install besides the add-on.
 
 > Status: version 1.1, in real-world validation by the author. Interface in English and Portuguese.
+>
+> 📖 **Documentation:** https://oseiasdfarias.github.io/autocards/ (English · Português)
 
 ## Why
 

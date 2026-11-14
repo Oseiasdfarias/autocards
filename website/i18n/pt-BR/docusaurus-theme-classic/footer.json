@@ -1,0 +1,34 @@
+{
+  "link.title.Docs": {
+    "message": "Documentação",
+    "description": "The title of the footer links column with title=Docs in the footer"
+  },
+  "link.title.Project": {
+    "message": "Projeto",
+    "description": "The title of the footer links column with title=Project in the footer"
+  },
+  "link.item.label.Getting started": {
+    "message": "Começar",
+    "description": "The label of footer link with label=Getting started linking to /docs/getting-started"
+  },
+  "link.item.label.Rules": {
+    "message": "Regras",
+    "description": "The label of footer link with label=Rules linking to /docs/rules"
+  },
+  "link.item.label.Troubleshooting": {
+    "message": "Solução de problemas",
+    "description": "The label of footer link with label=Troubleshooting linking to /docs/troubleshooting"
+  },
+  "link.item.label.GitHub": {
+    "message": "GitHub",
+    "description": "The label of footer link with label=GitHub linking to https://github.com/Oseiasdfarias/autocards"
+  },
+  "link.item.label.Issues": {
+    "message": "Relatar um problema",
+    "description": "The label of footer link with label=Issues linking to https://github.com/Oseiasdfarias/autocards/issues"
+  },
+  "copyright": {
+    "message": "AutoCards · AGPL-3.0",
+    "description": "The footer copyright"
+  }
+}

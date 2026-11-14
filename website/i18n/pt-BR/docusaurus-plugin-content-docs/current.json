@@ -1,0 +1,14 @@
+{
+  "version.label": {
+    "message": "Atual",
+    "description": "The label for version current"
+  },
+  "sidebar.docs.category.Using AutoCards": {
+    "message": "Usando o AutoCards",
+    "description": "The label for category 'Using AutoCards' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Help": {
+    "message": "Ajuda",
+    "description": "The label for category 'Help' in sidebar 'docs'"
+  }
+}

@@ -1,0 +1,25 @@
+.hero {
+  padding: 4rem 0 3rem;
+  text-align: center;
+  background: var(--ifm-color-emphasis-100);
+}
+.logo {
+  width: 88px;
+  height: 88px;
+  margin-bottom: 0.5rem;
+}
+.buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+.feature {
+  margin-bottom: 2rem;
+}
+@media (max-width: 996px) {
+  .hero {
+    padding: 2.5rem 1rem 2rem;
+  }
+}
